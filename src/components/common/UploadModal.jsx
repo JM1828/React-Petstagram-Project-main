@@ -1,6 +1,7 @@
 import "./UploadModal.css";
 import React, { useRef, useEffect, useState } from "react";
 import styled from "styled-components";
+import PostService from "../service/PostService";
 
 // 삭제 확인 모달 스타일
 const DeleteConfirmModal = styled.div`
