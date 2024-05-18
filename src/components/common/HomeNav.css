@@ -1,0 +1,47 @@
+.home-nav-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    width: 300px;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-wrapper {
+    width: 100%;
+    height: 100%;
+    border-right: 1px solid rgb(237, 237, 237);
+}
+
+.pethome {
+    margin-left: 20px;
+    margin-top: 50px;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+.menu-wrapper {
+    margin-top: 30px;
+}
+
+.menu-icon {
+    width: 35px;
+    height: 35px;
+    margin-right: 20px;
+}
+
+.menu-item {
+    margin-bottom: 20px; /* 메뉴 아이템 간의 간격 조정 */
+    font-size: 20px;
+}
+
+.menu-item.active {
+  font-weight: bold;
+  color: #000; /* 원하는 색상으로 변경 */
+}
+
+
+.menu-item:last-child {
+    margin-bottom: 0; /* 마지막 메뉴 아이템의 간격 제거 */
+}

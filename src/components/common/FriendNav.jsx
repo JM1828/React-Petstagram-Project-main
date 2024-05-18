@@ -1,0 +1,67 @@
+import "./FriendNav.css";
+import { useState, useEffect } from "react";
+import { jwtDecode } from "jwt-decode";
+import UserService from "../service/UserService";
+
+const FriendNav = ({ setIsLoggedIn, profileInfo, allUserProfiles }) => {
+    const handleLogout = () => {
+        const confirmDelete = window.confirm("로그아웃 하시겠습니까?");
+        if (confirmDelete) {
+            // 로컬 스토리지에서 토큰 삭제 및 로그아웃 처리
+            UserService.logout();
+            setIsLoggedIn(false);
+        }
+    };
+
+    return (
+        <div className="friendnav">
+            <div className="friendnav-user-info">
+                <img className="ellipse-3" />
+                <div className="friendnav-user-profile">
+                    <div className="friendnav-user-profile-wrapper">
+                        <div className="friendnav-user-email">
+                            {profileInfo.email}
+                        </div>
+                        <div className="friendnav-user-name">
+                            {profileInfo.name}
+                        </div>
+                    </div>
+                </div>
+                <div className="friendnav-logout">
+                    <div
+                        className="friendnav-logout-btn"
+                        onClick={handleLogout}
+                    >
+                        로그아웃
+                    </div>
+                </div>
+            </div>
+            <div className="friendnav-recommend">
+                <div className="friendnav-recommend-wrapper">
+                    <div className="friendnav-recommend-text">
+                        <div className="text-wrapper-8">회원님을 위한 추천</div>
+                    </div>
+                </div>
+                <div className="frame-19">
+                    <div className="text-wrapper-11">모두 보기</div>
+                </div>
+            </div>
+            <div className="frame-20">
+                <div className="frame-21">
+                    <div className="ellipse-3" />
+                    <div className="frame-13">
+                        <div className="frame-14">
+                            <div className="text-wrapper-8">User_Name</div>
+                            <div className="text-wrapper-9">text</div>
+                        </div>
+                    </div>
+                    <div className="frame-15">
+                        <div className="text-wrapper-10">User_Name</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export default FriendNav;

@@ -1,0 +1,31 @@
+.app {
+    background-color: #ffffff;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    width: 100%;
+}
+
+.app .div {
+    background-color: #ffffff;
+    height: 100vh;
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+    overflow-y: auto;
+}
+
+.main-container {
+    display: flex;
+    flex-direction: row;
+}
+
+.main-container.search-open .home-nav-container {
+    width: 60px; 
+}
+
+.content-container {
+    flex-grow: 1;
+    background-color: #f8f8f8;
+    padding: 20px;
+}
