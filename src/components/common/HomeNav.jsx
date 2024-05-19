@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Sidebar, Menu, MenuItem } from "react-pro-sidebar";
 import { useNavigate } from "react-router-dom";
+import petstagramIcon from "../../assets/petlogo.png";
 import homeIcon from "../../assets/homenav/menu-home-click.png";
 import messageIcon from "../../assets/homenav/menu-message.png";
 import searchIcon from "../../assets/homenav/menu-search.png";
@@ -12,10 +13,11 @@ import "./HomeNav.css";
 
 const HomeNav = ({ profileInfo, handleNavClick, navState }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isCollapsed, setIsCollapsed] = useState(window.innerWidth <= 1100);
     const navigate = useNavigate();
 
     const openModal = () => {
-        handleNavClick("none"); // 검색 상태 초기화
+        handleNavClick("none");
         setTimeout(() => {
             setIsModalOpen(true);
         }, 300);
@@ -26,10 +28,25 @@ const HomeNav = ({ profileInfo, handleNavClick, navState }) => {
         navigate(path);
     };
 
+    // 화면 크기 감지
+    useEffect(() => {
+        const handleResize = () => {
+            if (window.innerWidth <= 1100) {
+                setIsCollapsed(true);
+            } else {
+                setIsCollapsed(false);
+            }
+        };
+
+        window.addEventListener("resize", handleResize);
+        return () => {
+            window.removeEventListener("resize", handleResize);
+        };
+    }, []);
+
     return (
         <div className="home-nav-container">
-            <Sidebar className="sidebar-wrapper">
-                <div className="pethome">Petstagram</div>
+            <Sidebar className="sidebar-wrapper" collapsed={isCollapsed}>
                 <Menu iconShape="square" className="menu-wrapper">
                     <MenuItem
                         icon={
@@ -105,7 +122,7 @@ const HomeNav = ({ profileInfo, handleNavClick, navState }) => {
                             />
                         }
                         className={`menu-item ${navState.friends ? "active" : ""}`}
-                        onClick={() => handleMenuClick("friends", "/profile")}
+                        onClick={() => handleMenuClick("profile", "/profile")}
                     >
                         프로필
                     </MenuItem>

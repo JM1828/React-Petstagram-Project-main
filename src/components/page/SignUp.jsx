@@ -22,14 +22,12 @@ const SignUp = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // 이메일 유효성 검사를 위한 정규 표현식
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    // const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    // 이메일 입력 시, 유효성 검사 실행
-    if (!emailRegex.test(userData.email)) {
-      setErrorMessage('유효하지 않은 이메일 형식입니다.');
-      return;
-    }
+    // if (!emailRegex.test(userData.email)) {
+    //   setErrorMessage('유효하지 않은 이메일 형식입니다.');
+    //   return;
+    // }
 
     try {
       await UserService.signup(userData);
@@ -41,7 +39,7 @@ const SignUp = () => {
       alert('회원가입 완료');
       navigate('/');
     } catch (error) {
-      setErrorMessage(error.response.data);
+      setErrorMessage(error.response?.data || '회원가입에 실패했습니다.');
     }
   };
 
@@ -84,14 +82,6 @@ const SignUp = () => {
                 required
               />
             </div>
-            {/* <div className="form-group">
-                              <input
-                                  type="text"
-                                  placeholder="사용자 이름"
-                                  value={userId}
-                                  onChange={(e) => setUserId(e.target.value)}
-                              />
-                          </div> */}
             <div className="form-group">
               <input
                 type="password"
@@ -104,6 +94,7 @@ const SignUp = () => {
             </div>
             <Button type="submit">가입</Button>
           </form>
+          {errorMessage && <p className="error-message">{errorMessage}</p>}
         </div>
       </div>
       <div className="login-section">
