@@ -3,7 +3,7 @@ import axios from 'axios';
 class PostService {
   static BASE_URL = '/api';
 
-  // 게시글 리스트 조회
+  // 모든 게시글 리스트 조회
   static async getPostList() {
     const token = localStorage.getItem('token');
     const response = await axios.get(`${PostService.BASE_URL}/post/list`, {
@@ -11,6 +11,18 @@ class PostService {
         Authorization: `Bearer ${token}`,
       },
     });
+    return response.data;
+  }
+
+  // 사용자가 작성한 게시물 조회
+  static async getPostsByUserId(userId) {
+    const token = localStorage.getItem('token');
+    const response = await axios.get(
+      `${PostService.BASE_URL}/post/user/${userId}`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
     return response.data;
   }
 
@@ -24,18 +36,6 @@ class PostService {
           Authorization: `Bearer ${token}`,
           'Content-Type': 'multipart/form-data',
         },
-      }
-    );
-    return response.data;
-  }
-
-  // 사용자가 작성한 모든 게시물 조회
-  static async getPostsByUserId(userId) {
-    const token = localStorage.getItem('token');
-    const response = await axios.get(
-      `${PostService.BASE_URL}/post/user/${userId}`,
-      {
-        headers: { Authorization: `Bearer ${token}` },
       }
     );
     return response.data;
@@ -88,15 +88,16 @@ class PostService {
     return response.data;
   }
 
-  // 좋아요 상태
-  static async getPostLikeStatus (postId) {
+  // 게시물 좋아요 상태
+  static async getPostLikeStatus(postId) {
     const token = localStorage.getItem('token');
     const response = await axios.get(
-      `${PostService.BASE_URL}/like/post/status/${postId}`, 
+      `${PostService.BASE_URL}/like/post/status/${postId}`,
       {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    return response.data; 
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    return response.data;
   }
 }
 

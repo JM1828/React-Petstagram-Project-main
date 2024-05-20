@@ -13,6 +13,7 @@ import HomeNav from './components/common/HomeNav';
 import SearchNav from './components/common/SearchNav';
 import Feed from './components/page/Feed';
 import ExploreFeed from './components/page/ExploreFeed';
+import Message from './components/page/Message';
 import FriendNav from './components/common/FriendNav';
 import useUserProfile from './components/hook/useUserProfile';
 import useAllUserProfile from './components/hook/useAllUserProfile';
@@ -105,6 +106,7 @@ const App = () => {
           }
         />
 
+        {/* 홈 라우트 */}
         <Route
           path="/"
           element={
@@ -122,6 +124,7 @@ const App = () => {
                           postId={post.id}
                           postLikesCount={post.postLikesCount}
                           images={post.imageList}
+                          allUserProfiles={allUserProfiles}
                         />
                       ))}
                       <FriendNav
@@ -149,6 +152,7 @@ const App = () => {
           }
         />
 
+        {/* 탐색 탭 라우트 */}
         <Route
           path="/explore"
           element={
@@ -176,6 +180,33 @@ const App = () => {
           }
         />
 
+        {/* 메시지 라우트 */}
+        <Route
+          path="/messages"
+          element={
+            isLoggedIn ? (
+              <div className="app">
+                <div className="div">
+                  <Message />
+                  <div className="main-container">
+                    <HomeNav
+                      profileInfo={profileInfo}
+                      handleNavClick={handleNavClick}
+                      navState={navState}
+                    />
+                    {navState.search && (
+                      <SearchNav allUserProfiles={allUserProfiles} />
+                    )}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <Navigate to="/login" />
+            )
+          }
+        />
+
+        {/* 프로필 라우트 */}
         <Route
           path="/profile"
           element={

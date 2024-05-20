@@ -14,10 +14,10 @@ const Feed = ({
   postdate,
   postContent,
   images,
+  allUserProfiles,
   postId,
   postLikesCount,
 }) => {
-
   const uploadPostTime = GetRelativeTime(postdate);
   const [comments, setComments] = useState([]);
   const [commentText, setCommentText] = useState('');
@@ -28,11 +28,23 @@ const Feed = ({
     return `http://localhost:8088/uploads/${image.imageUrl}`; // 이미지 URL 구성
   };
 
+  const getProfileImageUrlForWriter = (email) => {
+    const user = allUserProfiles.find((user) => user.email === email);
+    if (user && user.profileImageUrl) {
+      return user.profileImageUrl;
+    }
+    return mock1; // 기본 이미지 URL 또는 대체 이미지
+  };
+
+  const profileImageUrl = getProfileImageUrlForWriter(writer);
+
+  // 좋아요 상태 및 개수 업데이트
   useEffect(() => {
-    // 좋아요 상태 및 개수 업데이트
     const updateLikeStatus = async () => {
       try {
-        const { liked, likesCount } = await PostService.getPostLikeStatus(postId); // 서버로부터 좋아요 상태와 개수를 받아옴
+        const { liked, likesCount } = await PostService.getPostLikeStatus(
+          postId
+        ); // 서버로부터 좋아요 상태와 개수를 받아옴
         setLiked(liked);
         setLikesCount(likesCount);
       } catch (error) {
@@ -47,12 +59,12 @@ const Feed = ({
   // 좋아요 버튼 클릭 처리 함수
   const handleLikeClick = async () => {
     try {
-        await PostService.togglePostLike(postId);
+      await PostService.togglePostLike(postId);
 
       // 좋아요 상태 반전
       const newLikesCount = !liked ? likesCount + 1 : likesCount - 1;
       setLiked(!liked);
-      setLikesCount(newLikesCount)
+      setLikesCount(newLikesCount);
     } catch (error) {
       console.error('좋아요 상태 변경 중 오류가 발생했습니다.', error);
     }
@@ -86,19 +98,17 @@ const Feed = ({
       console.log('댓글을 작성하는 중 오류가 발생했습니다.', error);
     }
   };
-  
+
   return (
     <div className="feed">
       <div className="feed-frame">
         <div className="feed-info">
-          <img className="feed-profile-img" src={mock1} />
+          <img className="feed-profile-img" src={profileImageUrl} />
           <div className="feed-writer-name">{writer}</div>
           <div className="feed-writer-date">{uploadPostTime}</div>
           <div className="feed-more">
             <button className="more-btn">
-              <div className="ellipse" />
-              <div className="ellipse" />
-              <div className="ellipse" />
+              <div className="ellipse">없애기</div>
             </button>
           </div>
         </div>

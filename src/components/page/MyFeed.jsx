@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useState } from "react";
 import "./MyFeed.css";
-import mock1 from "../../assets/7bok1.jpeg";
+import ProfileUpdateModal from "./ProfileUpdateModal";
 
 const MyFeed = ({ images, profileInfo }) => {
-    console.log(images)
+    const [isModalOpen, setModalOpen] = useState(false);
+
     const getImageUrl = (image) => {
         return `http://localhost:8088/uploads/${image.imageUrl}`; // 이미지 URL 구성
     };
@@ -12,7 +13,7 @@ const MyFeed = ({ images, profileInfo }) => {
         <div className="myfeed-frame">
             <div className="myfeed-user-info">
                 <div className="myfeed-user-avatar">
-                    <img src={mock1} alt="User Avatar" />
+                    <img src={profileInfo.profileImageUrl} alt="User Avatar" />
                 </div>
                 <div className="myfeed-user-main">
                     <div className="myfeed-user-header">
@@ -20,9 +21,13 @@ const MyFeed = ({ images, profileInfo }) => {
                             {profileInfo.email}
                         </h2>
                         <div className="myfeed-user-actions">
-                            <button className="myfeed-edit-btn">
+                            <button
+                                className="myfeed-edit-btn"
+                                onClick={() => setModalOpen(true)}
+                            >
                                 프로필 편집
                             </button>
+
                             <button className="myfeed-story-btn">
                                 보관된 스토리 보기
                             </button>
@@ -50,7 +55,7 @@ const MyFeed = ({ images, profileInfo }) => {
                         <span className="myfeed-user-profile">
                             {profileInfo.name}
                         </span>
-                        나는 지호
+                        {profileInfo.bio}
                     </div>
                 </div>
             </div>
@@ -66,6 +71,9 @@ const MyFeed = ({ images, profileInfo }) => {
                     ))}
                 </div>
             </div>
+            {isModalOpen && (
+                <ProfileUpdateModal onClose={() => setModalOpen(false)} profileInfo={profileInfo} />
+            )}
         </div>
     );
 };
