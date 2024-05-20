@@ -17,7 +17,7 @@ const Feed = ({
   postId,
   postLikesCount,
 }) => {
-  console.log(postLikesCount);
+
   const uploadPostTime = GetRelativeTime(postdate);
   const [comments, setComments] = useState([]);
   const [commentText, setCommentText] = useState('');
@@ -28,40 +28,31 @@ const Feed = ({
     return `http://localhost:8088/uploads/${image.imageUrl}`; // 이미지 URL 구성
   };
 
-  // 사용자별로 로컬 스토리지에 좋아요 상태 저장
-  const saveLikeData = (postId, liked) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      localStorage.setItem(
-        `likeData_${postId}_${token}`,
-        JSON.stringify({ liked })
-      );
-    }
-  };
-
-  // 사용자별로 로컬 스토리지에서 좋아요 상태 불러오기
-  const loadLikeData = (postId) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      const data = localStorage.getItem(`likeData_${postId}_${token}`);
-      if (data) {
-        return JSON.parse(data).liked;
+  useEffect(() => {
+    // 좋아요 상태 및 개수 업데이트
+    const updateLikeStatus = async () => {
+      try {
+        const { liked, likesCount } = await PostService.getPostLikeStatus(postId); // 서버로부터 좋아요 상태와 개수를 받아옴
+        setLiked(liked);
+        setLikesCount(likesCount);
+      } catch (error) {
+        console.error('좋아요 정보를 불러오는 중 오류가 발생했습니다.', error);
       }
-    }
-    return false; // 기본 값
-  };
+    };
+
+    updateLikeStatus();
+    fetchComments(); // 댓글 목록 불러오기
+  }, [postId]);
 
   // 좋아요 버튼 클릭 처리 함수
   const handleLikeClick = async () => {
     try {
-      const newLikesCount = await PostService.togglePostLike(postId);
+        await PostService.togglePostLike(postId);
 
       // 좋아요 상태 반전
-      const newLikedState = !liked;
-      // const newLikesCount = newLikedState ? likesCount + 1 : likesCount - 1;
-
-      setLiked(newLikedState);
-      saveLikeData(postId, newLikedState);
+      const newLikesCount = !liked ? likesCount + 1 : likesCount - 1;
+      setLiked(!liked);
+      setLikesCount(newLikesCount)
     } catch (error) {
       console.error('좋아요 상태 변경 중 오류가 발생했습니다.', error);
     }
@@ -95,15 +86,7 @@ const Feed = ({
       console.log('댓글을 작성하는 중 오류가 발생했습니다.', error);
     }
   };
-
-  // 컴포넌트가 마운트 될 때 댓글 목록을 불러옴
-  useEffect(() => {
-    const { liked, likesCount } = loadLikeData(postId);
-    setLiked(liked);
-    setLikesCount(likesCount);
-    fetchComments();
-  }, [postId]);
-
+  
   return (
     <div className="feed">
       <div className="feed-frame">

@@ -87,6 +87,17 @@ class PostService {
     );
     return response.data;
   }
+
+  // 좋아요 상태
+  static async getPostLikeStatus (postId) {
+    const token = localStorage.getItem('token');
+    const response = await axios.get(
+      `${PostService.BASE_URL}/like/post/status/${postId}`, 
+      {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    return response.data; 
+  }
 }
 
 export default PostService;
