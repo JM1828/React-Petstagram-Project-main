@@ -17,7 +17,7 @@ const Feed = ({
   postId,
   postLikesCount,
 }) => {
-    console.log(postLikesCount);
+  console.log(postLikesCount);
   const uploadPostTime = GetRelativeTime(postdate);
   const [comments, setComments] = useState([]);
   const [commentText, setCommentText] = useState('');
@@ -28,23 +28,42 @@ const Feed = ({
     return `http://localhost:8088/uploads/${image.imageUrl}`; // 이미지 URL 구성
   };
 
+  // 사용자별로 로컬 스토리지에 좋아요 상태 저장
+  const saveLikeData = (postId, liked) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      localStorage.setItem(
+        `likeData_${postId}_${token}`,
+        JSON.stringify({ liked })
+      );
+    }
+  };
+
+  // 사용자별로 로컬 스토리지에서 좋아요 상태 불러오기
+  const loadLikeData = (postId) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      const data = localStorage.getItem(`likeData_${postId}_${token}`);
+      if (data) {
+        return JSON.parse(data).liked;
+      }
+    }
+    return false; // 기본 값
+  };
+
   // 좋아요 버튼 클릭 처리 함수
-const handleLikeClick = async () => {
+  const handleLikeClick = async () => {
     try {
-        await PostService.togglePostLike(postId);
-        
-        // 좋아요 상태 반전
-        setLiked(!liked);
-  
-        // 좋아요 상태에 따라 좋아요 개수 조정
-        if (!liked) {
-            setLikesCount(likesCount + 1);
-        } else {
-            setLikesCount(likesCount - 1);
-        }
-  
+      const newLikesCount = await PostService.togglePostLike(postId);
+
+      // 좋아요 상태 반전
+      const newLikedState = !liked;
+      // const newLikesCount = newLikedState ? likesCount + 1 : likesCount - 1;
+
+      setLiked(newLikedState);
+      saveLikeData(postId, newLikedState);
     } catch (error) {
-        console.error("좋아요 상태 변경 중 오류가 발생했습니다.", error);
+      console.error('좋아요 상태 변경 중 오류가 발생했습니다.', error);
     }
   };
 
@@ -79,8 +98,11 @@ const handleLikeClick = async () => {
 
   // 컴포넌트가 마운트 될 때 댓글 목록을 불러옴
   useEffect(() => {
+    const { liked, likesCount } = loadLikeData(postId);
+    setLiked(liked);
+    setLikesCount(likesCount);
     fetchComments();
-  }, []);
+  }, [postId]);
 
   return (
     <div className="feed">
@@ -111,7 +133,12 @@ const handleLikeClick = async () => {
         )}
         <div className="feed-active">
           <div className="feed-active-btn">
-            <img className="heart_img" alt="좋아요" src={heartIcon} onClick={handleLikeClick} />
+            <img
+              className="heart_img"
+              alt="좋아요"
+              src={heartIcon}
+              onClick={handleLikeClick}
+            />
             <img className="share_img" alt="공유" src={shareIcon} />
             <img className="comment_img" alt="댓글" src={commentIcon} />
           </div>
