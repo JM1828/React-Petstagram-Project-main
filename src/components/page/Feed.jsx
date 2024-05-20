@@ -153,7 +153,7 @@ const Feed = ({
           <div className="feed-comments">
             {comments.map((comment, index) => (
               <div key={index} className="feed-comment-item">
-                <span>{comment.commentNickName}</span>: {comment.commentContent}
+                <span>{comment.commentEmail}</span>: {comment.commentContent}
               </div>
             ))}
           </div>

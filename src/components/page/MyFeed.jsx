@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import "./MyFeed.css";
 import ProfileUpdateModal from "./ProfileUpdateModal";
 
-const MyFeed = ({ images, profileInfo }) => {
+const MyFeed = ({ images, profileInfo, postUserCount }) => {
     const [isModalOpen, setModalOpen] = useState(false);
 
     const getImageUrl = (image) => {
@@ -39,7 +39,7 @@ const MyFeed = ({ images, profileInfo }) => {
                     <div className="myfeed-user-stats">
                         <div className="myfeed-user-stat">
                             <span className="myfeed-stat-label">게시물</span>
-                            <span className="myfeed-stat-number">4</span>
+                            <span className="myfeed-stat-number">{postUserCount}</span>
                         </div>
                         <div className="myfeed-user-stat">
                             <span className="myfeed-stat-label">팔로워</span>

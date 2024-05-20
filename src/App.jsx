@@ -216,6 +216,7 @@ const App = () => {
                   <MyFeed
                     images={postUserList.flatMap((post) => post.imageList)}
                     profileInfo={profileInfo}
+                    postUserCount={postUserList.length}
                   />
                   <div className="main-container">
                     <HomeNav
