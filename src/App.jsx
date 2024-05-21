@@ -190,7 +190,8 @@ const App = () => {
             isLoggedIn ? (
               <div className="app">
                 <div className="div">
-                  <Message />
+                  <Message allUserProfiles={allUserProfiles}
+                  />
                   <div className="main-container">
                     <HomeNav
                       profileInfo={profileInfo}

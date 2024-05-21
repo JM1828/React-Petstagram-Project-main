@@ -7,13 +7,10 @@ class ChatRoomService {
   static async sendMessage(formData) {
     const token = localStorage.getItem('token');
     const response = await axios.post(
-      `${UserService.BASE_URL}/message/send`,
+      `${ChatRoomService.BASE_URL}/user/message/send`,
       formData,
       {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          //   'Content-Type': 'multipart/form-data',
-        },
+        headers: {Authorization: `Bearer ${token}`},
       }
     );
     return response.data;
@@ -23,7 +20,7 @@ class ChatRoomService {
   static async deleteMessage(commentId) {
     const token = localStorage.getItem('token');
     const response = await axios.delete(
-      `${ChatRoomService.BASE_URL}/message/delete/${commentId}`,
+      `${ChatRoomService.BASE_URL}/user/message/delete/${commentId}`,
       {
         headers: { Authorization: `Bearer ${token}` },
       }
@@ -35,7 +32,7 @@ class ChatRoomService {
   static async createChatRoom(chatRoomDTO) {
     const token = localStorage.getItem('token');
     const response = await axios.post(
-      `${this.BASE_URL}/chatRooms`,
+      `${this.BASE_URL}/user/chatRooms`,
       chatRoomDTO,
       {
         headers: { Authorization: `Bearer ${token}` },
@@ -45,10 +42,10 @@ class ChatRoomService {
   }
 
   // 채팅방 참여
-  static async joinChatRoom(roomId) {
+  static async addUserToChatRoom(roomId) {
     const token = localStorage.getItem('token');
     const response = await axios.post(
-      `${this.BASE_URL}/chatRooms/join/${roomId}`,
+      `${this.BASE_URL}/user/chatRooms/join/${roomId}`,
       {},
       {
         headers: { Authorization: `Bearer ${token}` },

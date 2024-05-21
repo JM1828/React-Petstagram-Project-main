@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import './MessageRoom.css';
-import UserService from '../service/UserService';
+import ChatRoomService from '../service/ChatRoomService';
 
-const MessageRoom = () => {
+const MessageRoom = ({ chatRoom, selectedUser }) => {
   const [messageContent, setMessageContent] = useState(''); // 메시지 입력 상태 관리
+  const [messages, setMessages] = useState([]); // 메시지 목록 상태 추가
 
   // 메시지 입력 핸들러
   const handleMessageChange = (event) => {
@@ -21,11 +22,14 @@ const MessageRoom = () => {
   const sendMessage = async () => {
     if (messageContent.trim() === '') return; // 메시지가 비어있는 경우 전송하지 않음
 
-    const formData = new FormData();
-    formData.append('messageContent', messageContent);
+    const messageData = {
+      messageContent: messageContent,
+      chatRoomId: chatRoom.id,
+      receiverEmail: selectedUser?.email // 선택된 사용자의 이메일 동적 설정
+    };
 
     try {
-      const response = await UserService.sendMessage(formData); // 메시지 전송
+      const response = await ChatRoomService.sendMessage(messageData); // 메시지 전송
       console.log('메시지 전송 결과:', response);
       setMessageContent(''); // 메시지 전송 후 입력 필드 초기화
     } catch (error) {
@@ -47,13 +51,15 @@ const MessageRoom = () => {
 
       <div className="user_info">
         <img className="profile_image2" />
-        <div className="user_name_two">User_Name</div>
-        <div className="user_status">user_name • petstagram</div>
+        <div className="user_name_two">{selectedUser?.name}</div>
+        <div className="user_status">{selectedUser?.email} • petstagram</div>
         <button className="profile_btn">프로필 보기</button>
       </div>
 
-      <div className="text_section">
-        <div className="text">text</div>
+      <div className="message_list">
+        {messages.map((msg, index) => (
+          <div key={index} className="message">{msg.content}</div>
+        ))}
       </div>
 
       <div className="input_section">
