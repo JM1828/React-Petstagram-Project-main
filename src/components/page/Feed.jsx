@@ -16,13 +16,12 @@ const Feed = ({
   images,
   allUserProfiles,
   postId,
-  postLikesCount,
 }) => {
   const uploadPostTime = GetRelativeTime(postdate);
   const [comments, setComments] = useState([]);
   const [commentText, setCommentText] = useState('');
-  const [liked, setLiked] = useState(false);
-  const [likesCount, setLikesCount] = useState(postLikesCount);
+  const [postLiked, setPostLiked] = useState(false);
+  const [postLikesCount, setPostLikesCount] = useState(0);
 
   const getImageUrl = (image) => {
     return `http://localhost:8088/uploads/${image.imageUrl}`; // 이미지 URL 구성
@@ -42,11 +41,11 @@ const Feed = ({
   useEffect(() => {
     const updateLikeStatus = async () => {
       try {
-        const { liked, likesCount } = await PostService.getPostLikeStatus(
+        const { postLiked, postLikesCount } = await PostService.getPostLikeStatus(
           postId
         ); // 서버로부터 좋아요 상태와 개수를 받아옴
-        setLiked(liked);
-        setLikesCount(likesCount);
+        setPostLiked(postLiked);
+        setPostLikesCount(postLikesCount);
       } catch (error) {
         console.error('좋아요 정보를 불러오는 중 오류가 발생했습니다.', error);
       }
@@ -62,9 +61,9 @@ const Feed = ({
       await PostService.togglePostLike(postId);
 
       // 좋아요 상태 반전
-      const newLikesCount = !liked ? likesCount + 1 : likesCount - 1;
-      setLiked(!liked);
-      setLikesCount(newLikesCount);
+      const newLikesCount = !postLiked ? postLikesCount + 1 : postLikesCount - 1;
+      setPostLiked(!postLiked);
+      setPostLikesCount(newLikesCount);
     } catch (error) {
       console.error('좋아요 상태 변경 중 오류가 발생했습니다.', error);
     }
@@ -138,7 +137,7 @@ const Feed = ({
           <img className="bookmark-img" alt="저장" src={bookmarkIcon} />
         </div>
         <div className="feed-post-info">
-          <div className="feed-heart-count">좋아요 {likesCount}개</div>
+          <div className="feed-heart-count">좋아요 {postLikesCount}개</div>
           <div>
             {/* 작성자 아이디 추가하기 */}
             <p className="feed-post-content">

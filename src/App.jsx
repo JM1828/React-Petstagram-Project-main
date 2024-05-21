@@ -23,6 +23,7 @@ import MyFeed from './components/page/MyFeed';
 const App = () => {
   const { isLoggedIn, setIsLoggedIn, profileInfo } = useUserProfile();
   const { allUserProfiles, loading, error } = useAllUserProfile();
+  const { isPostSuccess, setIsPostSuccess } = useState(false);
   const [postList, setPostList] = useState([]);
   const [postUserList, setPostUserList] = useState([]);
 
@@ -38,8 +39,9 @@ const App = () => {
     };
     if (isLoggedIn) {
       fetchPosts();
+    
     }
-  }, [isLoggedIn]);
+  }, [isLoggedIn, isPostSuccess]);
 
   // 사용자가 작성한 게시물을 가져오는 useEffect
   useEffect(() => {
@@ -122,7 +124,6 @@ const App = () => {
                           postdate={post.regTime}
                           postContent={post.postContent}
                           postId={post.id}
-                          postLikesCount={post.postLikesCount}
                           images={post.imageList}
                           allUserProfiles={allUserProfiles}
                         />
@@ -139,6 +140,7 @@ const App = () => {
                       profileInfo={profileInfo}
                       handleNavClick={handleNavClick}
                       navState={navState}
+                      setIsPostSuccess={setIsPostSuccess}
                     />
                     {navState.search && (
                       <SearchNav allUserProfiles={allUserProfiles} />
@@ -167,6 +169,7 @@ const App = () => {
                       profileInfo={profileInfo}
                       handleNavClick={handleNavClick}
                       navState={navState}
+                      setIsPostSuccess={setIsPostSuccess}
                     />
                     {navState.search && (
                       <SearchNav allUserProfiles={allUserProfiles} />
@@ -193,6 +196,7 @@ const App = () => {
                       profileInfo={profileInfo}
                       handleNavClick={handleNavClick}
                       navState={navState}
+                      setIsPostSuccess={setIsPostSuccess}
                     />
                     {navState.search && (
                       <SearchNav allUserProfiles={allUserProfiles} />
@@ -223,6 +227,7 @@ const App = () => {
                       profileInfo={profileInfo}
                       handleNavClick={handleNavClick}
                       navState={navState}
+                      setIsPostSuccess={setIsPostSuccess}
                     />
                     {navState.search && (
                       <SearchNav allUserProfiles={allUserProfiles} />

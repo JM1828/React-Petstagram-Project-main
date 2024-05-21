@@ -11,7 +11,7 @@ import createIcon from "../../assets/homenav/menu-create.png";
 import { UploadModal } from "./UploadModal";
 import "./HomeNav.css";
 
-const HomeNav = ({ profileInfo, handleNavClick, navState }) => {
+const HomeNav = ({ profileInfo, handleNavClick, navState, setIsPostSuccess }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isCollapsed, setIsCollapsed] = useState(window.innerWidth <= 1100);
     const navigate = useNavigate();
@@ -114,6 +114,7 @@ const HomeNav = ({ profileInfo, handleNavClick, navState }) => {
                         }
                         onClick={openModal}
                         className="menu-item"
+                        
                     >
                         만들기
                     </MenuItem>
@@ -135,6 +136,7 @@ const HomeNav = ({ profileInfo, handleNavClick, navState }) => {
                     <UploadModal
                         onClose={() => setIsModalOpen(false)}
                         profileInfo={profileInfo}
+                        setIsPostSuccess={setIsPostSuccess}
                     />
                 )}
             </Sidebar>
