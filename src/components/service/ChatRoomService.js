@@ -16,17 +16,17 @@ class ChatRoomService {
     return response.data;
   }
 
-  // 메세지 삭제
-  static async deleteMessage(commentId) {
-    const token = localStorage.getItem('token');
-    const response = await axios.delete(
-      `${ChatRoomService.BASE_URL}/user/message/delete/${commentId}`,
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
-    );
-    return response.data;
-  }
+  // // 메세지 삭제
+  // static async deleteMessage(commentId) {
+  //   const token = localStorage.getItem('token');
+  //   const response = await axios.delete(
+  //     `${ChatRoomService.BASE_URL}/user/message/delete/${commentId}`,
+  //     {
+  //       headers: { Authorization: `Bearer ${token}` },
+  //     }
+  //   );
+  //   return response.data;
+  // }
 
   // 채팅방 생성
   static async createChatRoom(chatRoomDTO) {
@@ -41,18 +41,18 @@ class ChatRoomService {
     return response.data;
   }
 
-  // // 채팅방 참여
-  // static async addUserToChatRoom(roomId) {
-  //   const token = localStorage.getItem('token');
-  //   const response = await axios.post(
-  //     `${this.BASE_URL}/user/chatRooms/join/${roomId}`,
-  //     {},
-  //     {
-  //       headers: { Authorization: `Bearer ${token}` },
-  //     }
-  //   );
-  //   return response.data;
-  // }
+  // 채팅방 및 메시지 목록 조회
+  static async addUserToChatRoom(roomId) {
+    const token = localStorage.getItem('token');
+    const response = await axios.post(
+      `${this.BASE_URL}/user/chatRooms/join/${roomId}`,
+      {},
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    return response.data;
+  }
 }
 
 export default ChatRoomService;

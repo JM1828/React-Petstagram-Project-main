@@ -206,7 +206,7 @@ const App = () => {
             isLoggedIn ? (
               <div className="app">
                 <div className="div">
-                  <Message allUserProfiles={allUserProfiles} />
+                  <Message />
                   <div className="main-container">
                     <HomeNav
                       profileInfo={profileInfo}

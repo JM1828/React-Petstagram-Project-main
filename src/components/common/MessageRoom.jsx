@@ -24,7 +24,7 @@ const MessageRoom = ({ chatRoom, selectedUser }) => {
 
     const messageData = {
       messageContent: messageContent,
-      chatRoomId: chatRoom.id,
+      chatRoomId: chatRoom,
       receiverEmail: selectedUser?.email // 선택된 사용자의 이메일 동적 설정
     };
 
