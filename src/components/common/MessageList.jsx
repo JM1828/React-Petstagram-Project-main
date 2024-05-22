@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './MessageList.css';
 import styled from 'styled-components';
+import GetRelativeTime from '../../utils/GetRelativeTime';
 
 const Overlay = styled.div`
   position: fixed;
@@ -97,14 +98,17 @@ const SelectButton = styled.button`
   text-align: center;
 `;
 
-const MessageList = ({ allUserProfiles, handleSelectedUser, setChatRoom }) => {
+const MessageList = ({ allUserProfiles, handleSelectedUser, messages }) => {
   const userProfilesArray = Array.isArray(allUserProfiles)
     ? allUserProfiles
     : [];
-  const [showModal, setShowModal] = useState(false);
-  const [searchText, setSearchText] = useState('');
-  const [selectedUser, setSelectedUser] = useState(null);
-  const [chatHistory, setChatHistory] = useState([]); // 대화 내역을 저장할 상태
+    
+    const [showModal, setShowModal] = useState(false);
+    const [searchText, setSearchText] = useState('');
+    const [selectedUser, setSelectedUser] = useState(null);
+    const [latestMessageContent, setLatestMessageContent] = useState('');
+    const [latestRegTime, setLatestRegTime] = useState('');
+    const uploadPostTime = GetRelativeTime(latestRegTime);
 
   const handleClose = () => {
     setShowModal(false);
@@ -129,29 +133,29 @@ const MessageList = ({ allUserProfiles, handleSelectedUser, setChatRoom }) => {
     return userProfilesArray.filter(
       (user) =>
         user.email.toLowerCase().includes(searchText.toLowerCase()) ||
-      (user.name &&
-        user.name.toLowerCase().includes(searchText.toLowerCase()))
-      );
+        (user.name &&
+          user.name.toLowerCase().includes(searchText.toLowerCase()))
+    );
   };
 
   const searchResults = getSearchUsers();
 
-  const mockdata = [
-    { id: 1, user: 'User_Name', text: 'text · 00분', image: '' },
-  ];
-
   const handleCreateChatRoom = () => {
     if (selectedUser) {
       handleSelectedUser(selectedUser);
-      // 선택된 사용자의 대화 내역을 가져와서 상태에 저장
-      const chatHistoryForSelectedUser = [
-        { id: selectedUser.id, user: selectedUser.email, text: '안녕하세요', time: '1분 전' },
-      ];
-      setChatHistory(chatHistoryForSelectedUser);
     } else {
       console.warn('선택된 사용자가 없습니다.');
     }
   };
+
+  useEffect(() => {
+    // 메시지 배열의 변화를 감지하여 최신 메시지의 상태를 업데이트
+    if (messages.length > 0) {
+      const latestMessage = messages[messages.length - 1];
+      setLatestMessageContent(latestMessage.messageContent);
+      setLatestRegTime(latestMessage.regTime);
+    }
+  }, [messages]); // 메시지 배열이 변경될 때만 이 효과를 실행
 
   return (
     <div className="messagelist">
@@ -165,18 +169,24 @@ const MessageList = ({ allUserProfiles, handleSelectedUser, setChatRoom }) => {
         />
       </div>
 
-      {/* 선택된 사용자의 대화 내역을 표시 */}
-      {chatHistory.map((message) => (
-        <div key={message.id} className="Message_message_item">
+      {messages.length > 0 ? (
+        <div className="Message_message_item">
           <div className="Message_post-ellipse" />
           <img className="Message_ellipse" />
           <div className="Message_message_info">
-            <div className="Message_user_name">{message.user}</div>
-            <div className="Message_message_text">{message.text}</div>
-            <div className="Message_message_time">{message.time}</div>
+            <div className="Message_user_name">
+              {latestMessageContent
+                ? messages[messages.length - 1].receiverEmail
+                : ''}
+            </div>
+            <div className="Message_message_text">나: {latestMessageContent}</div>
+            <div className="Message_message_time">• {uploadPostTime}</div>
           </div>
         </div>
-      ))}
+      ) : (
+        // 메시지가 없을 경우 표시될 내용
+        <div className="Message_message_text">메시지가 없습니다.</div>
+      )}
 
       {showModal && (
         <Overlay>
