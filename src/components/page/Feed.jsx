@@ -1,13 +1,17 @@
 import './Feed.css';
 import commentIcon from '../../assets/feed/feed-comment.png';
 import heartIcon from '../../assets/feed/feed-heart.png';
+import heartFillIcon from '../../assets/feed/feed-heart-fill.png';
 import shareIcon from '../../assets/feed/feed-share.png';
 import bookmarkIcon from '../../assets/feed/feed-save.png';
-import mock1 from '../../assets/7bok1.jpeg';
+import moreIcon from '../../assets/feed/feed-more.png';
+import BasicImage from '../../assets/basic-profile.jpeg';
 import GetRelativeTime from '../../utils/GetRelativeTime';
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import CommentService from '../service/CommentService';
 import PostService from '../service/PostService';
+import useUserProfile from '../hook/useUserProfile';
 
 const Feed = ({
   writer,
@@ -22,9 +26,11 @@ const Feed = ({
   const [commentText, setCommentText] = useState('');
   const [postLiked, setPostLiked] = useState(false);
   const [postLikesCount, setPostLikesCount] = useState(0);
+  const { profileInfo } = useUserProfile();
+  const navigate = useNavigate();
 
   const getImageUrl = (image) => {
-    return `http://localhost:8088/uploads/${image.imageUrl}`; // 이미지 URL 구성
+    return `http://localhost:8088/uploads/${image.imageUrl}`;
   };
 
   const getProfileImageUrlForWriter = (email) => {
@@ -32,7 +38,7 @@ const Feed = ({
     if (user && user.profileImageUrl) {
       return user.profileImageUrl;
     }
-    return mock1; // 기본 이미지 URL 또는 대체 이미지
+    return BasicImage;
   };
 
   const profileImageUrl = getProfileImageUrlForWriter(writer);
@@ -41,9 +47,8 @@ const Feed = ({
   useEffect(() => {
     const updateLikeStatus = async () => {
       try {
-        const { postLiked, postLikesCount } = await PostService.getPostLikeStatus(
-          postId
-        ); // 서버로부터 좋아요 상태와 개수를 받아옴
+        const { postLiked, postLikesCount } =
+          await PostService.getPostLikeStatus(postId); // 서버로부터 좋아요 상태와 개수를 받아옴
         setPostLiked(postLiked);
         setPostLikesCount(postLikesCount);
       } catch (error) {
@@ -52,7 +57,7 @@ const Feed = ({
     };
 
     updateLikeStatus();
-    fetchComments(); // 댓글 목록 불러오기
+    fetchComments();
   }, [postId]);
 
   // 좋아요 버튼 클릭 처리 함수
@@ -61,11 +66,21 @@ const Feed = ({
       await PostService.togglePostLike(postId);
 
       // 좋아요 상태 반전
-      const newLikesCount = !postLiked ? postLikesCount + 1 : postLikesCount - 1;
+      const newLikesCount = !postLiked
+        ? postLikesCount + 1
+        : postLikesCount - 1;
       setPostLiked(!postLiked);
       setPostLikesCount(newLikesCount);
     } catch (error) {
       console.error('좋아요 상태 변경 중 오류가 발생했습니다.', error);
+    }
+  };
+
+  const handleUserClick = () => {
+    if (profileInfo.email == writer) {
+      navigate(`/profile`);
+    } else {
+      navigate(`/friendfeed/${writer}`);
     }
   };
 
@@ -102,12 +117,27 @@ const Feed = ({
     <div className="feed">
       <div className="feed-frame">
         <div className="feed-info">
-          <img className="feed-profile-img" src={profileImageUrl} />
-          <div className="feed-writer-name">{writer}</div>
-          <div className="feed-writer-date">{uploadPostTime}</div>
+          <div className="feed-user-info" onClick={handleUserClick}>
+            <div>
+              <img className="feed-profile-img" src={profileImageUrl} />
+            </div>
+            <div>
+              <div className="feed-writer-name">{writer}</div>
+            </div>
+            <div>
+              <div className="feed-writer-date">
+                {'· ' + uploadPostTime + ' ·'}
+              </div>
+            </div>
+
+            {profileInfo.email !== writer && (
+              <button className="feed-user-follow">팔로우</button>
+            )}
+          </div>
+
           <div className="feed-more">
-            <button className="more-btn">
-              <div className="ellipse">없애기</div>
+            <button className="feed-more-btn">
+              <img className="feed-more-img" src={moreIcon}></img>
             </button>
           </div>
         </div>
@@ -126,9 +156,9 @@ const Feed = ({
         <div className="feed-active">
           <div className="feed-active-btn">
             <img
-              className="heart_img"
+              className={`heart_img ${postLiked ? 'liked' : ''}`}
               alt="좋아요"
-              src={heartIcon}
+              src={postLiked ? heartFillIcon : heartIcon}
               onClick={handleLikeClick}
             />
             <img className="share_img" alt="공유" src={shareIcon} />
@@ -152,7 +182,7 @@ const Feed = ({
           <div className="feed-comments">
             {comments.map((comment, index) => (
               <div key={index} className="feed-comment-item">
-                <span>{comment.commentEmail}</span>: {comment.commentContent}
+                <span>{comment.commentEmail}</span>:{comment.commentContent}
               </div>
             ))}
           </div>

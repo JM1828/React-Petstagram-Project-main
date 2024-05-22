@@ -41,18 +41,18 @@ class ChatRoomService {
     return response.data;
   }
 
-  // 채팅방 참여
-  static async addUserToChatRoom(roomId) {
-    const token = localStorage.getItem('token');
-    const response = await axios.post(
-      `${this.BASE_URL}/user/chatRooms/join/${roomId}`,
-      {},
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
-    );
-    return response.data;
-  }
+  // // 채팅방 참여
+  // static async addUserToChatRoom(roomId) {
+  //   const token = localStorage.getItem('token');
+  //   const response = await axios.post(
+  //     `${this.BASE_URL}/user/chatRooms/join/${roomId}`,
+  //     {},
+  //     {
+  //       headers: { Authorization: `Bearer ${token}` },
+  //     }
+  //   );
+  //   return response.data;
+  // }
 }
 
 export default ChatRoomService;

@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import './MessageList.css';
-import ChatRoomService from '../service/ChatRoomService';
 
 const MessageList = ({ allUserProfiles, handleSelectedUser  }) => {
+//   const messages = [
+//     { id: 1, user: "User_Name", text: "text · 00분", image: "" },
+// ];
+
   const userProfilesArray = Array.isArray(allUserProfiles)
     ? allUserProfiles
     : [];

@@ -13,17 +13,21 @@ import HomeNav from './components/common/HomeNav';
 import SearchNav from './components/common/SearchNav';
 import Feed from './components/page/Feed';
 import ExploreFeed from './components/page/ExploreFeed';
+import FriendFeed from './components/page/FriendFeed';
 import Message from './components/page/Message';
 import FriendNav from './components/common/FriendNav';
 import useUserProfile from './components/hook/useUserProfile';
 import useAllUserProfile from './components/hook/useAllUserProfile';
 import PostService from './components/service/PostService';
 import MyFeed from './components/page/MyFeed';
+import NotificationNav from './components/common/NotificationNav';
 
 const App = () => {
   const { isLoggedIn, setIsLoggedIn, profileInfo } = useUserProfile();
   const { allUserProfiles, loading, error } = useAllUserProfile();
-  const { isPostSuccess, setIsPostSuccess } = useState(false);
+
+  // postSuccess -> 글 등록시 렌더링 시키기 위해
+  const [postSuccess, setPostSuccess] = useState(false);
   const [postList, setPostList] = useState([]);
   const [postUserList, setPostUserList] = useState([]);
 
@@ -39,9 +43,9 @@ const App = () => {
     };
     if (isLoggedIn) {
       fetchPosts();
-    
+      setPostSuccess(false);
     }
-  }, [isLoggedIn, isPostSuccess]);
+  }, [isLoggedIn, postSuccess]);
 
   // 사용자가 작성한 게시물을 가져오는 useEffect
   useEffect(() => {
@@ -61,14 +65,17 @@ const App = () => {
       }
     };
 
-    fetchUserPosts();
-  }, [isLoggedIn, profileInfo]);
+    if (isLoggedIn && profileInfo.id) {
+      fetchUserPosts();
+    }
+  }, [isLoggedIn, profileInfo.id]);
 
   const [navState, setNavState] = useState({
     home: true,
     search: false,
     explore: false,
     messages: false,
+    notification: false,
     profile: false,
   });
 
@@ -78,8 +85,11 @@ const App = () => {
       search: menu === 'search' ? !prevState.search : false,
       explore: false,
       messages: false,
+      notification: menu === 'notification' ? !prevState.notification : false,
       profile: false,
-      [menu]: menu !== 'search' || !prevState.search,
+      [menu]:
+        (menu !== 'search' && menu !== 'notification') ||
+        (!prevState.search && !prevState.notification),
     }));
   };
 
@@ -140,10 +150,13 @@ const App = () => {
                       profileInfo={profileInfo}
                       handleNavClick={handleNavClick}
                       navState={navState}
-                      setIsPostSuccess={setIsPostSuccess}
+                      setPostSuccess={setPostSuccess}
                     />
                     {navState.search && (
                       <SearchNav allUserProfiles={allUserProfiles} />
+                    )}
+                    {navState.notification && (
+                      <NotificationNav allUserProfiles={allUserProfiles} />
                     )}
                   </div>
                 </div>
@@ -169,10 +182,13 @@ const App = () => {
                       profileInfo={profileInfo}
                       handleNavClick={handleNavClick}
                       navState={navState}
-                      setIsPostSuccess={setIsPostSuccess}
+                      setPostSuccess={setPostSuccess}
                     />
                     {navState.search && (
                       <SearchNav allUserProfiles={allUserProfiles} />
+                    )}
+                    {navState.notification && (
+                      <NotificationNav allUserProfiles={allUserProfiles} />
                     )}
                   </div>
                 </div>
@@ -190,17 +206,19 @@ const App = () => {
             isLoggedIn ? (
               <div className="app">
                 <div className="div">
-                  <Message allUserProfiles={allUserProfiles}
-                  />
+                  <Message allUserProfiles={allUserProfiles} />
                   <div className="main-container">
                     <HomeNav
                       profileInfo={profileInfo}
                       handleNavClick={handleNavClick}
                       navState={navState}
-                      setIsPostSuccess={setIsPostSuccess}
+                      setPostSuccess={setPostSuccess}
                     />
                     {navState.search && (
                       <SearchNav allUserProfiles={allUserProfiles} />
+                    )}
+                    {navState.notification && (
+                      <NotificationNav allUserProfiles={allUserProfiles} />
                     )}
                   </div>
                 </div>
@@ -221,14 +239,43 @@ const App = () => {
                   <MyFeed
                     images={postUserList.flatMap((post) => post.imageList)}
                     profileInfo={profileInfo}
-                    postUserCount={postUserList.length}
                   />
                   <div className="main-container">
                     <HomeNav
                       profileInfo={profileInfo}
                       handleNavClick={handleNavClick}
                       navState={navState}
-                      setIsPostSuccess={setIsPostSuccess}
+                      setPostSuccess={setPostSuccess}
+                    />
+                    {navState.search && (
+                      <SearchNav allUserProfiles={allUserProfiles} />
+                    )}
+                    {navState.notification && (
+                      <NotificationNav allUserProfiles={allUserProfiles} />
+                    )}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <Navigate to="/login" />
+            )
+          }
+        />
+
+        {/* 친구 피드 라우트 */}
+        <Route
+          path="/friendfeed/:userId"
+          element={
+            isLoggedIn ? (
+              <div className="app">
+                <div className="div">
+                  <FriendFeed />
+                  <div className="main-container">
+                    <HomeNav
+                      profileInfo={profileInfo}
+                      handleNavClick={handleNavClick}
+                      navState={navState}
+                      setPostSuccess={setPostSuccess}
                     />
                     {navState.search && (
                       <SearchNav allUserProfiles={allUserProfiles} />

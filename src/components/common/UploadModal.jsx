@@ -92,7 +92,7 @@ const EmojiList = styled.div`
     justify-content: space-between;
 `;
 
-export const UploadModal = ({ onClose, profileInfo, setIsPostSuccess }) => {
+export const UploadModal = ({ onClose, profileInfo, setPostSuccess }) => {
     const fileInputRef = useRef(null);
     const [selectedImage, setSelectedImage] = useState(null);
     const [text, setText] = useState("");
@@ -184,7 +184,7 @@ export const UploadModal = ({ onClose, profileInfo, setIsPostSuccess }) => {
 
             const token = localStorage.getItem("token");
             const response = await PostService.createPost(formData, token);
-            setIsPostSuccess(true);
+            setPostSuccess(true);
             onClose();
         } catch (error) {
             console.error('게시글 업로드 중 오류 발생:', error);
@@ -237,7 +237,7 @@ export const UploadModal = ({ onClose, profileInfo, setIsPostSuccess }) => {
                     </div>
                     <div className="post-details-section">
                         <div className="post-user-info">
-                            <div className="post-ellipse" />
+                            <img className="post-ellipse" src={profileInfo.profileImageUrl}/>
                             <div className="post-text-wrapper-3">
                                 {profileInfo.email}
                             </div>
