@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import './MessageList.css';
 import styled from 'styled-components';
 import GetRelativeTime from '../../utils/GetRelativeTime';
+import { useNavigate, useParams, Route } from 'react-router-dom';
+import ChatRoomService from '../service/ChatRoomService';
+import useAllUserProfile from '../hook/useAllUserProfile';
 
 const Overlay = styled.div`
   position: fixed;
@@ -98,17 +101,16 @@ const SelectButton = styled.button`
   text-align: center;
 `;
 
-const MessageList = ({ allUserProfiles, handleSelectedUser, messages }) => {
+const MessageList = ({ allUserProfiles, messages, handleSelectedUser, chatRoomId }) => {
   const userProfilesArray = Array.isArray(allUserProfiles)
     ? allUserProfiles
     : [];
-    
-    const [showModal, setShowModal] = useState(false);
-    const [searchText, setSearchText] = useState('');
-    const [selectedUser, setSelectedUser] = useState(null);
-    const [latestMessageContent, setLatestMessageContent] = useState('');
-    const [latestRegTime, setLatestRegTime] = useState('');
-    const uploadPostTime = GetRelativeTime(latestRegTime);
+  const [showModal, setShowModal] = useState(false);
+  const [searchText, setSearchText] = useState('');
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [latestMessageContent, setLatestMessageContent] = useState('');
+  const [latestRegTime, setLatestRegTime] = useState('');
+  const navigate = useNavigate();
 
   const handleClose = () => {
     setShowModal(false);
@@ -123,7 +125,8 @@ const MessageList = ({ allUserProfiles, handleSelectedUser, messages }) => {
   };
 
   const handleUserSelect = (user) => {
-    setSelectedUser(user);
+    console.log('선택된 사용자:', user);
+    setSelectedUser(user); // 선택된 사용자 저장
   };
 
   const getSearchUsers = () => {
@@ -157,6 +160,10 @@ const MessageList = ({ allUserProfiles, handleSelectedUser, messages }) => {
     }
   }, [messages]); // 메시지 배열이 변경될 때만 이 효과를 실행
 
+  const handleUserClick = (chatRoomId) => {
+    navigate(`/messages/${chatRoomId}`);
+  };
+
   return (
     <div className="messagelist">
       <div className="Message_title_div">
@@ -170,21 +177,26 @@ const MessageList = ({ allUserProfiles, handleSelectedUser, messages }) => {
       </div>
 
       {messages.length > 0 ? (
-        <div className="Message_message_item">
-          <div className="Message_post-ellipse" />
-          <img className="Message_ellipse" />
-          <div className="Message_message_info">
-            <div className="Message_user_name">
-              {latestMessageContent
-                ? messages[messages.length - 1].receiverEmail
-                : ''}
+        messages.map((message, index) => (
+          <div
+            key={index}
+            className="Message_message_item"
+            onClick={() => handleUserClick(message.chatRoomId)}
+          >
+            <div className="Message_post-ellipse" />
+            <img className="Message_ellipse" />
+            <div className="Message_message_info">
+              <div className="Message_user_name">{message.receiverEmail}</div>
+              <div className="Message_message_text">
+                나: {message.messageContent}
+              </div>
+              <div className="Message_message_time">
+                • {GetRelativeTime(message.regTime)}
+              </div>
             </div>
-            <div className="Message_message_text">나: {latestMessageContent}</div>
-            <div className="Message_message_time">• {uploadPostTime}</div>
           </div>
-        </div>
+        ))
       ) : (
-        // 메시지가 없을 경우 표시될 내용
         <div className="Message_message_text">메시지가 없습니다.</div>
       )}
 

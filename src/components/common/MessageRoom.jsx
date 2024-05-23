@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import './MessageRoom.css';
 import ChatRoomService from '../service/ChatRoomService';
 
-const MessageRoom = ({ chatRoom, selectedUser, messages, setMessages }) => {
+const MessageRoom = ({ chatRoomId, selectedUser, messages, setMessages, chatRoom }) => {
   const [messageContent, setMessageContent] = useState(''); // 메시지 입력 상태 관리
 
   // 메시지 입력 핸들러

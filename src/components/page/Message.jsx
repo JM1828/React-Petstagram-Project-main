@@ -2,18 +2,39 @@ import React, { useState, useEffect } from 'react';
 import useAllUserProfile from '../hook/useAllUserProfile';
 import MessageList from '../common/MessageList';
 import MessageRoom from '../common/MessageRoom';
+import { useParams, useNavigate } from 'react-router-dom';
 import ChatRoomService from '../service/ChatRoomService';
 
 const Message = () => {
+  const { chatRoomId } = useParams();
   const { allUserProfiles } = useAllUserProfile();
   const [chatRoom, setChatRoom] = useState(null); // 채팅방 ID를 저장할 상태
   const [selectedUser, setSelectedUser] = useState(null); // 선택된 사용자 저장할 상태
   const [messages, setMessages] = useState([]); // 메시지 상태 추가
+  const navigate = useNavigate();
 
-  // 사용자 선택후 채팅방 생성
+  // // 채팅 목록
+  // useEffect(() => {
+  //   const fetchChatRoomData = async () => {
+  //     try {
+  //       const chatMessages = await ChatRoomService.addUserToChatRoom(
+  //         chatRoomId
+  //       );
+  //       console.log('채팅 메시지 목록 : ' + chatMessages.messages);
+  //       setMessages(chatMessages.messages);
+  //     } catch (error) {
+  //       console.error('메시지 내역 불러오기 실패:', error);
+  //     }
+  //   };
+
+  //   if (chatRoomId) {
+  //     fetchChatRoomData();
+  //   }
+  // }, [chatRoomId]); // chatRoom ID가 변경될 때마다 실행
+
+  // 채팅방 생성
   const handleSelectedUser = async (selectedUser) => {
-    console.log('선택된 사용자:', selectedUser);
-    setSelectedUser(selectedUser); // 선택된 사용자 저장
+    setSelectedUser(selectedUser);
 
     const chatRoomDTO = {
       userEmails: [selectedUser.email],
@@ -21,38 +42,25 @@ const Message = () => {
 
     try {
       const response = await ChatRoomService.createChatRoom(chatRoomDTO);
-      setChatRoom(response.id); // 채팅방 ID 저장
+      console.log('채팅방 ID 저장 : ' + response.id);
+      setChatRoom(response.id);
+      // navigate(`/messages/${response.id}`);
     } catch (error) {
       console.error('채팅방 생성 실패:', error);
     }
   };
 
-  // useEffect(() => {
-  //   const fetchChatHistory = async () => {
-  //     if (chatRoom) {
-  //       try {
-  //         const chatMessages = await ChatRoomService.addUserToChatRoom(chatRoom);
-  //         console.log("채팅 메시지 목록 : " + chatMessages)
-  //         // chatMessages가 배열인지 확인 후 배열이 아닌 경우 빈 배열로 설정
-  //         setChatHistory(Array.isArray(chatMessages) ? chatMessages : []);
-  //       } catch (error) {
-  //         console.error('메시지 내역 불러오기 실패:', error);
-  //       }
-  //     }
-  //   };
-  
-  //   fetchChatHistory();
-  // }, [chatRoom]); // chatRoom ID가 변경될 때마다 실행
-
   return (
     <div>
       <MessageList
+        chatRoomId={chatRoomId}
         allUserProfiles={allUserProfiles}
         handleSelectedUser={handleSelectedUser}
         messages={messages} // 메시지 상태 전달
       />
       <MessageRoom
         chatRoom={chatRoom}
+        chatRoomId={chatRoomId}
         allUserProfiles={allUserProfiles}
         selectedUser={selectedUser} // 선택된 사용자 상태 전달
         messages={messages} // 메시지 상태 전달

@@ -21,15 +21,24 @@ import useAllUserProfile from './components/hook/useAllUserProfile';
 import PostService from './components/service/PostService';
 import MyFeed from './components/page/MyFeed';
 import NotificationNav from './components/common/NotificationNav';
+import useFollowStatus from './components/hook/useFollowStatus';
+import useFollowCounts from './components/hook/useFollowCounts';
 
 const App = () => {
-  const { isLoggedIn, setIsLoggedIn, profileInfo } = useUserProfile();
-  const { allUserProfiles, loading, error } = useAllUserProfile();
+  const { isLoggedIn, setIsLoggedIn, profileInfo, fetchProfileInfo } =
+    useUserProfile();
+  const { allUserProfiles, loading, error, fetchAllUsers } =
+    useAllUserProfile();
 
   // postSuccess -> 글 등록시 렌더링 시키기 위해
   const [postSuccess, setPostSuccess] = useState(false);
   const [postList, setPostList] = useState([]);
   const [postUserList, setPostUserList] = useState([]);
+
+  const { handleFollow, handleUnfollow, isFollowing } = useFollowStatus(
+    allUserProfiles,
+    profileInfo
+  );
 
   // 모든 게시물 목록을 가져오는 useEffect
   useEffect(() => {
@@ -47,7 +56,7 @@ const App = () => {
     }
   }, [isLoggedIn, postSuccess]);
 
-  // 사용자가 작성한 게시물을 가져오는 useEffect
+  // 현재 로그인한 사용자가 작성한 게시물을 가져오는 useEffect
   useEffect(() => {
     const fetchUserPosts = async () => {
       if (isLoggedIn && profileInfo.id) {
@@ -68,7 +77,7 @@ const App = () => {
     if (isLoggedIn && profileInfo.id) {
       fetchUserPosts();
     }
-  }, [isLoggedIn, profileInfo.id]);
+  }, [isLoggedIn, profileInfo.id, postSuccess]);
 
   const [navState, setNavState] = useState({
     home: true,
@@ -92,6 +101,12 @@ const App = () => {
         (!prevState.search && !prevState.notification),
     }));
   };
+
+  // useEffect(() => {
+  //     if (!loading && !error && isLoggedIn) {
+  //         console.log("All user profiles loaded successfully.");
+  //     }
+  // }, [allUserProfiles, loading, error, isLoggedIn]);
 
   return (
     <Router>
@@ -136,12 +151,19 @@ const App = () => {
                           postId={post.id}
                           images={post.imageList}
                           allUserProfiles={allUserProfiles}
+                          isFollowing={isFollowing}
+                          handleFollow={handleFollow}
+                          handleUnfollow={handleUnfollow}
                         />
                       ))}
                       <FriendNav
                         setIsLoggedIn={setIsLoggedIn}
                         profileInfo={profileInfo}
                         allUserProfiles={allUserProfiles}
+                        fetchAllUsers={fetchAllUsers}
+                        isFollowing={isFollowing}
+                        handleFollow={handleFollow}
+                        handleUnfollow={handleUnfollow}
                       />
                     </>
                   )}
@@ -228,6 +250,34 @@ const App = () => {
             )
           }
         />
+        <Route
+          path="/messages/:chatRoomId"
+          element={
+            isLoggedIn ? (
+              <div className="app">
+                <div className="div">
+                  <Message />
+                  <div className="main-container">
+                    <HomeNav
+                      profileInfo={profileInfo}
+                      handleNavClick={handleNavClick}
+                      navState={navState}
+                      setPostSuccess={setPostSuccess}
+                    />
+                    {navState.search && (
+                      <SearchNav allUserProfiles={allUserProfiles} />
+                    )}
+                    {navState.notification && (
+                      <NotificationNav allUserProfiles={allUserProfiles} />
+                    )}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <Navigate to="/login" />
+            )
+          }
+        />
 
         {/* 프로필 라우트 */}
         <Route
@@ -239,6 +289,10 @@ const App = () => {
                   <MyFeed
                     images={postUserList.flatMap((post) => post.imageList)}
                     profileInfo={profileInfo}
+                    postSuccess={postSuccess}
+                    setPostSuccess={setPostSuccess}
+                    fetchProfileInfo={fetchProfileInfo}
+                    allUserProfiles={allUserProfiles}
                   />
                   <div className="main-container">
                     <HomeNav
@@ -279,6 +333,9 @@ const App = () => {
                     />
                     {navState.search && (
                       <SearchNav allUserProfiles={allUserProfiles} />
+                    )}
+                    {navState.notification && (
+                      <NotificationNav allUserProfiles={allUserProfiles} />
                     )}
                   </div>
                 </div>
