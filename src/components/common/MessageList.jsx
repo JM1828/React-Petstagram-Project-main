@@ -101,15 +101,19 @@ const SelectButton = styled.button`
   text-align: center;
 `;
 
-const MessageList = ({ allUserProfiles, messages, handleSelectedUser, chatRoomId }) => {
+const MessageList = ({
+  allUserProfiles,
+  messages,
+  handleSelectedUser,
+  
+}) => {
   const userProfilesArray = Array.isArray(allUserProfiles)
     ? allUserProfiles
     : [];
   const [showModal, setShowModal] = useState(false);
   const [searchText, setSearchText] = useState('');
   const [selectedUser, setSelectedUser] = useState(null);
-  const [latestMessageContent, setLatestMessageContent] = useState('');
-  const [latestRegTime, setLatestRegTime] = useState('');
+  const [latestMessages, setLatestMessages] = useState({});
   const navigate = useNavigate();
 
   const handleClose = () => {
@@ -152,13 +156,36 @@ const MessageList = ({ allUserProfiles, messages, handleSelectedUser, chatRoomId
   };
 
   useEffect(() => {
-    // 메시지 배열의 변화를 감지하여 최신 메시지의 상태를 업데이트
-    if (messages.length > 0) {
+    const chatRoomsMessages = messages.reduce((acc, message) => {
+      if (acc[message.chatRoomId]) {
+        acc[message.chatRoomId].push(message);
+      } else {
+        acc[message.chatRoomId] = [message];
+      }
+      return acc;
+    }, {});
+
+    const latestMessages = Object.keys(chatRoomsMessages).reduce((acc, chatRoomId) => {
+      const messages = chatRoomsMessages[chatRoomId];
       const latestMessage = messages[messages.length - 1];
-      setLatestMessageContent(latestMessage.messageContent);
-      setLatestRegTime(latestMessage.regTime);
-    }
-  }, [messages]); // 메시지 배열이 변경될 때만 이 효과를 실행
+      acc[chatRoomId] = latestMessage;
+      return acc;
+    }, {});
+
+    setLatestMessages(latestMessages);
+  }, [messages]);
+
+// // 채팅 목록
+//   const fetchChatRoomData = async (chatRoomId) => {
+//     try {
+//       // useParams를 사용하여 URL에서 chatRoomId를 가져옵니다.
+//       const chatMessages = await ChatRoomService.addUserToChatRoom(chatRoomId);
+//       console.log('채팅 메시지 목록 : ' + chatMessages.messages);
+//       setChatMessages(chatMessages.messages);
+//     } catch (error) {
+//       console.error('메시지 내역 불러오기 실패:', error);
+//     }
+//   }
 
   const handleUserClick = (chatRoomId) => {
     navigate(`/messages/${chatRoomId}`);
@@ -176,29 +203,35 @@ const MessageList = ({ allUserProfiles, messages, handleSelectedUser, chatRoomId
         />
       </div>
 
-      {messages.length > 0 ? (
-        messages.map((message, index) => (
-          <div
-            key={index}
-            className="Message_message_item"
-            onClick={() => handleUserClick(message.chatRoomId)}
-          >
-            <div className="Message_post-ellipse" />
-            <img className="Message_ellipse" />
-            <div className="Message_message_info">
-              <div className="Message_user_name">{message.receiverEmail}</div>
-              <div className="Message_message_text">
-                나: {message.messageContent}
-              </div>
-              <div className="Message_message_time">
-                • {GetRelativeTime(message.regTime)}
+      {Object.keys(latestMessages).length > 0 ? (
+        Object.keys(latestMessages).map((chatRoomId) => {
+          const latestMessage = latestMessages[chatRoomId];
+          return (
+            <div
+              key={chatRoomId}
+              className="Message_message_item"
+              onClick={() => handleUserClick(chatRoomId)}
+            >
+              <div className="Message_post-ellipse" />
+              <img className="Message_ellipse" />
+              <div className="Message_message_info">
+                <div className="Message_user_name">
+                  {latestMessage.receiverEmail}
+                </div>
+                <div className="Message_message_text">
+                  나: {latestMessage.messageContent}
+                </div>
+                <div className="Message_message_time">
+                  • {GetRelativeTime(latestMessage.regTime)}
+                </div>
               </div>
             </div>
-          </div>
-        ))
+          );
+        })
       ) : (
         <div className="Message_message_text">메시지가 없습니다.</div>
       )}
+
 
       {showModal && (
         <Overlay>

@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useE } from 'react';
 import './MessageRoom.css';
 import ChatRoomService from '../service/ChatRoomService';
+import { useNavigate } from 'react-router-dom';
 
-const MessageRoom = ({ chatRoomId, selectedUser, messages, setMessages, chatRoom }) => {
+const MessageRoom = ({ selectedUser, messages, setMessages, chatRoom }) => {
   const [messageContent, setMessageContent] = useState(''); // 메시지 입력 상태 관리
+  const navigate = useNavigate();
 
   // 메시지 입력 핸들러
   const handleMessageChange = (event) => {
@@ -19,16 +21,16 @@ const MessageRoom = ({ chatRoomId, selectedUser, messages, setMessages, chatRoom
 
   // 메시지 전송 핸들러
   const sendMessage = async () => {
-    if (messageContent.trim() === '') return; // 메시지가 비어있는 경우 전송하지 않음
+    if (messageContent.trim() === '') return; 
 
     const messageData = {
       messageContent: messageContent,
       chatRoomId: chatRoom,
-      receiverEmail: selectedUser?.email, // 선택된 사용자의 이메일 동적 설정
+      receiverEmail: selectedUser?.email,
     };
 
     try {
-      const response = await ChatRoomService.sendMessage(messageData); // 메시지 전송
+      const response = await ChatRoomService.sendMessage(messageData); 
       console.log('메시지 전송 결과:', response);
       setMessageContent(''); // 메시지 전송 후 입력 필드 초기화
 
@@ -37,6 +39,8 @@ const MessageRoom = ({ chatRoomId, selectedUser, messages, setMessages, chatRoom
         ...prevMessages,
         { content: messageContent, ...response },
       ]);
+
+      navigate(`/messages/${chatRoom}`); 
     } catch (error) {
       console.error('메시지 전송 실패:', error);
     }
@@ -62,14 +66,16 @@ const MessageRoom = ({ chatRoomId, selectedUser, messages, setMessages, chatRoom
       </div>
 
       <div className="message_list">
-        {messages.map((msg, index) => (
-          <div
-            key={index}
-            className={`message ${msg.sender ? 'receive' : 'send'}`}
-          >
-            {msg.messageContent}
-          </div>
-        ))}
+        {messages
+          .filter((msg) => msg.chatRoomId === chatRoom) // 현재 채팅방 ID와 일치하는 메시지만 필터링
+          .map((msg, index) => (
+            <div
+              key={index}
+              className={`message ${msg.sender ? 'receive' : 'send'}`}
+            >
+              {msg.messageContent}
+            </div>
+          ))}
       </div>
 
       <div className="input_section">
