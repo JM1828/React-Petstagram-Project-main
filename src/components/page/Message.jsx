@@ -11,7 +11,7 @@ const Message = () => {
   const [chatRoom, setChatRoom] = useState(null); // 채팅방 ID를 저장할 상태
   const [selectedUser, setSelectedUser] = useState(null); // 선택된 사용자 저장할 상태
   const [messages, setMessages] = useState([]); // 메시지 상태 추가
-  const [chatMessages, setChatMessages] = useState([]);
+  const [chatRoomMessages, setChatRoomMessages] = useState([]);
   const navigate = useNavigate();
 
   // 채팅방 생성
@@ -24,28 +24,45 @@ const Message = () => {
 
     try {
       const response = await ChatRoomService.createChatRoom(chatRoomDTO);
-      console.log('채팅방 ID 저장 : ' + response.id);
+      console.log('채팅방 ID 저장 : ' + response);
       setChatRoom(response.id);
+      navigate(`/messages/${response.id}`);
     } catch (error) {
       console.error('채팅방 생성 실패:', error);
     }
   };
 
+  // chatRoomId가 변경될 때 메시지 불러오기
+  useEffect(() => {
+    const fetchChatRoomMessages = async () => {
+      try {
+        if (chatRoomId) {
+          const response  = await ChatRoomService.chatRoomMessages(chatRoomId);
+          console.log("채팅 목록" + response);
+          setMessages(response);
+        }
+      } catch (error) {
+        console.error('메시지 내역 불러오기 실패:', error);
+      }
+    };
+
+    fetchChatRoomMessages();
+  }, []);
+
   return (
     <div>
       <MessageList
-        chatRoomId={chatRoomId}
+        chatRoom={chatRoom}
         allUserProfiles={allUserProfiles}
         handleSelectedUser={handleSelectedUser}
-        messages={messages} 
+        messages={messages}
         setMessages={setMessages}
       />
       <MessageRoom
-        chatRoomId={chatRoomId}
         chatRoom={chatRoom}
         allUserProfiles={allUserProfiles}
         selectedUser={selectedUser}
-        messages={messages} 
+        messages={messages}
         setMessages={setMessages}
       />
     </div>

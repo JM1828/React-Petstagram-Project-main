@@ -1,4 +1,4 @@
-import React, { useState, useE } from 'react';
+import React, { useState } from 'react';
 import './MessageRoom.css';
 import ChatRoomService from '../service/ChatRoomService';
 import { useNavigate } from 'react-router-dom';
@@ -6,6 +6,9 @@ import { useNavigate } from 'react-router-dom';
 const MessageRoom = ({ selectedUser, messages, setMessages, chatRoom }) => {
   const [messageContent, setMessageContent] = useState(''); // 메시지 입력 상태 관리
   const navigate = useNavigate();
+
+   // 현재 채팅방의 메시지 필터링
+   const filteredMessages = messages.filter((msg) => msg.chatRoomId === chatRoom);
 
   // 메시지 입력 핸들러
   const handleMessageChange = (event) => {
@@ -24,8 +27,8 @@ const MessageRoom = ({ selectedUser, messages, setMessages, chatRoom }) => {
     if (messageContent.trim() === '') return; 
 
     const messageData = {
-      messageContent: messageContent,
       chatRoomId: chatRoom,
+      messageContent,
       receiverEmail: selectedUser?.email,
     };
 
@@ -35,10 +38,8 @@ const MessageRoom = ({ selectedUser, messages, setMessages, chatRoom }) => {
       setMessageContent(''); // 메시지 전송 후 입력 필드 초기화
 
       // 새로운 메시지를 메시지 목록에 추가
-      setMessages((prevMessages) => [
-        ...prevMessages,
-        { content: messageContent, ...response },
-      ]);
+      const newMessage = { ...messageData, ...response };
+      setMessages((prevMessages) => [...prevMessages, newMessage]);
 
       navigate(`/messages/${chatRoom}`); 
     } catch (error) {
@@ -66,16 +67,14 @@ const MessageRoom = ({ selectedUser, messages, setMessages, chatRoom }) => {
       </div>
 
       <div className="message_list">
-        {messages
-          .filter((msg) => msg.chatRoomId === chatRoom) // 현재 채팅방 ID와 일치하는 메시지만 필터링
-          .map((msg, index) => (
-            <div
-              key={index}
-              className={`message ${msg.sender ? 'receive' : 'send'}`}
-            >
-              {msg.messageContent}
-            </div>
-          ))}
+        {filteredMessages.map((msg, index) => (
+          <div
+            key={index}
+            className={`message ${msg.sender ? 'receive' : 'send'}`}
+          >
+            {msg.messageContent}
+          </div>
+        ))}
       </div>
 
       <div className="input_section">

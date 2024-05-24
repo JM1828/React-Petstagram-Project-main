@@ -42,11 +42,10 @@ class ChatRoomService {
   }
 
   // 채팅방 및 메시지 목록 조회
-  static async addUserToChatRoom(roomId) {
+  static async fetchLatestMessages(chatRoomId) {
     const token = localStorage.getItem('token');
-    const response = await axios.post(
-      `${this.BASE_URL}/user/chatRooms/join/${roomId}`,
-      {},
+    const response = await axios.get(
+      `${this.BASE_URL}/user/chatRooms/${chatRoomId}`,
       {
         headers: { Authorization: `Bearer ${token}` },
       }

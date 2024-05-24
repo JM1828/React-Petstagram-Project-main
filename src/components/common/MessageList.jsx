@@ -4,7 +4,6 @@ import styled from 'styled-components';
 import GetRelativeTime from '../../utils/GetRelativeTime';
 import { useNavigate, useParams, Route } from 'react-router-dom';
 import ChatRoomService from '../service/ChatRoomService';
-import useAllUserProfile from '../hook/useAllUserProfile';
 
 const Overlay = styled.div`
   position: fixed;
@@ -105,7 +104,7 @@ const MessageList = ({
   allUserProfiles,
   messages,
   handleSelectedUser,
-  
+  chatRoom
 }) => {
   const userProfilesArray = Array.isArray(allUserProfiles)
     ? allUserProfiles
@@ -175,20 +174,17 @@ const MessageList = ({
     setLatestMessages(latestMessages);
   }, [messages]);
 
-// // 채팅 목록
-//   const fetchChatRoomData = async (chatRoomId) => {
-//     try {
-//       // useParams를 사용하여 URL에서 chatRoomId를 가져옵니다.
-//       const chatMessages = await ChatRoomService.addUserToChatRoom(chatRoomId);
-//       console.log('채팅 메시지 목록 : ' + chatMessages.messages);
-//       setChatMessages(chatMessages.messages);
-//     } catch (error) {
-//       console.error('메시지 내역 불러오기 실패:', error);
-//     }
-//   }
-
-  const handleUserClick = (chatRoomId) => {
-    navigate(`/messages/${chatRoomId}`);
+  const handleUserClick = async (chatRoomId) => {
+    try {
+      // 채팅방의 최신 메시지를 가져옴
+      const response = await ChatRoomService.fetchLatestMessages(chatRoomId);
+      const newLatestMessages = { ...latestMessages, [chatRoomId]: response };
+      console.log("최신 메시지 : " + newLatestMessages)
+      setLatestMessages(newLatestMessages);
+      navigate(`/messages/${chatRoomId}`);
+    } catch (error) {
+      console.error('최신 메시지 가져오기 실패:', error);
+    }
   };
 
   return (
