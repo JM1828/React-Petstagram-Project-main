@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import './MessageList.css';
 import styled from 'styled-components';
 import GetRelativeTime from '../../utils/GetRelativeTime';
-import { useNavigate, useParams, Route } from 'react-router-dom';
 import ChatRoomService from '../service/ChatRoomService';
 
 const Overlay = styled.div`
@@ -102,9 +101,8 @@ const SelectButton = styled.button`
 
 const MessageList = ({
   allUserProfiles,
-  messages,
   handleSelectedUser,
-  chatRoom
+  handleUserClick,
 }) => {
   const userProfilesArray = Array.isArray(allUserProfiles)
     ? allUserProfiles
@@ -112,8 +110,22 @@ const MessageList = ({
   const [showModal, setShowModal] = useState(false);
   const [searchText, setSearchText] = useState('');
   const [selectedUser, setSelectedUser] = useState(null);
-  const [latestMessages, setLatestMessages] = useState({});
-  const navigate = useNavigate();
+  const [chatMessageList, setChatMessageList] = useState([]);
+
+  // 모든 채팅방 리스트 가져오기
+  useEffect(() => {
+    const fetchChatMessageList = async () => {
+      try {
+        const response = await ChatRoomService.getChatRoomList();
+        console.log(response);
+        setChatMessageList(response);
+      } catch (error) {
+        console.error('Error fetching chat message list:', error);
+      }
+    };
+
+    fetchChatMessageList();
+  }, []);
 
   const handleClose = () => {
     setShowModal(false);
@@ -128,8 +140,7 @@ const MessageList = ({
   };
 
   const handleUserSelect = (user) => {
-    console.log('선택된 사용자:', user);
-    setSelectedUser(user); // 선택된 사용자 저장
+    setSelectedUser(user);
   };
 
   const getSearchUsers = () => {
@@ -149,41 +160,9 @@ const MessageList = ({
   const handleCreateChatRoom = () => {
     if (selectedUser) {
       handleSelectedUser(selectedUser);
+      handleClose();
     } else {
       console.warn('선택된 사용자가 없습니다.');
-    }
-  };
-
-  useEffect(() => {
-    const chatRoomsMessages = messages.reduce((acc, message) => {
-      if (acc[message.chatRoomId]) {
-        acc[message.chatRoomId].push(message);
-      } else {
-        acc[message.chatRoomId] = [message];
-      }
-      return acc;
-    }, {});
-
-    const latestMessages = Object.keys(chatRoomsMessages).reduce((acc, chatRoomId) => {
-      const messages = chatRoomsMessages[chatRoomId];
-      const latestMessage = messages[messages.length - 1];
-      acc[chatRoomId] = latestMessage;
-      return acc;
-    }, {});
-
-    setLatestMessages(latestMessages);
-  }, [messages]);
-
-  const handleUserClick = async (chatRoomId) => {
-    try {
-      // 채팅방의 최신 메시지를 가져옴
-      const response = await ChatRoomService.fetchLatestMessages(chatRoomId);
-      const newLatestMessages = { ...latestMessages, [chatRoomId]: response };
-      console.log("최신 메시지 : " + newLatestMessages)
-      setLatestMessages(newLatestMessages);
-      navigate(`/messages/${chatRoomId}`);
-    } catch (error) {
-      console.error('최신 메시지 가져오기 실패:', error);
     }
   };
 
@@ -199,35 +178,42 @@ const MessageList = ({
         />
       </div>
 
-      {Object.keys(latestMessages).length > 0 ? (
-        Object.keys(latestMessages).map((chatRoomId) => {
-          const latestMessage = latestMessages[chatRoomId];
-          return (
-            <div
-              key={chatRoomId}
-              className="Message_message_item"
-              onClick={() => handleUserClick(chatRoomId)}
-            >
-              <div className="Message_post-ellipse" />
-              <img className="Message_ellipse" />
-              <div className="Message_message_info">
-                <div className="Message_user_name">
-                  {latestMessage.receiverEmail}
+      {Object.keys(chatMessageList).length > 0 ? (
+        Object.values(chatMessageList).map((chatRoom) => (
+          <div
+            key={chatRoom.id}
+            className="Message_message_item"
+            onClick={() => handleUserClick(chatRoom.id)}
+          >
+            <div className="Message_post-ellipse" />
+            <img className="Message_ellipse" />
+            <div className="Message_message_info">
+              {/* 채팅방에 참여하는 모든 사용자 이름 표시 */}
+              {chatRoom.userNames.map((userName, index) => (
+                <div key={index} className="Message_user_name">
+                  {userName}
                 </div>
-                <div className="Message_message_text">
-                  나: {latestMessage.messageContent}
-                </div>
-                <div className="Message_message_time">
-                  • {GetRelativeTime(latestMessage.regTime)}
-                </div>
+              ))}
+              <div className="Message_message_text">
+                {/* 채팅방의 첫 번째 메시지 표시 */}
+                {chatRoom.messages.length > 0
+                  ? chatRoom.messages[0].messageContent
+                  : '메시지가 없습니다.'}
+              </div>
+              {/* 채팅방의 마지막 메시지의 시간 표시 */}
+              <div className="Message_message_time">
+                {chatRoom.messages.length > 0
+                  ? GetRelativeTime(
+                      chatRoom.messages[chatRoom.messages.length - 1].regTime
+                    )
+                  : ''}
               </div>
             </div>
-          );
-        })
+          </div>
+        ))
       ) : (
         <div className="Message_message_text">메시지가 없습니다.</div>
       )}
-
 
       {showModal && (
         <Overlay>

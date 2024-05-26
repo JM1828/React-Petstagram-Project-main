@@ -1,14 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './MessageRoom.css';
 import ChatRoomService from '../service/ChatRoomService';
 import { useNavigate } from 'react-router-dom';
 
-const MessageRoom = ({ selectedUser, messages, setMessages, chatRoom }) => {
+const MessageRoom = ({ selectedUser, chatRoomId }) => {
   const [messageContent, setMessageContent] = useState(''); // 메시지 입력 상태 관리
+  const [messages, setMessages] = useState([]);
   const navigate = useNavigate();
 
-   // 현재 채팅방의 메시지 필터링
-   const filteredMessages = messages.filter((msg) => msg.chatRoomId === chatRoom);
+  // 채팅방의 메시지 내역 가져오기
+  useEffect(() => {
+    if (!chatRoomId) return;
+    const fetchMessages = async () => {
+      try {
+        const response = await ChatRoomService.chatRoomMessages(chatRoomId);
+        setMessages(response.messages);
+      } catch (error) {
+        console.error('Error fetching messages:', error);
+      }
+    };
+
+    fetchMessages();
+  }, [chatRoomId]);
 
   // 메시지 입력 핸들러
   const handleMessageChange = (event) => {
@@ -24,24 +37,24 @@ const MessageRoom = ({ selectedUser, messages, setMessages, chatRoom }) => {
 
   // 메시지 전송 핸들러
   const sendMessage = async () => {
-    if (messageContent.trim() === '') return; 
+    if (messageContent.trim() === '') return;
 
     const messageData = {
-      chatRoomId: chatRoom,
-      messageContent,
-      receiverEmail: selectedUser?.email,
+      chatRoomId: chatRoomId,
+      receiverId: selectedUser.id,
+      messageContent: messageContent,
     };
 
     try {
-      const response = await ChatRoomService.sendMessage(messageData); 
+      const response = await ChatRoomService.sendMessage(messageData);
       console.log('메시지 전송 결과:', response);
-      setMessageContent(''); // 메시지 전송 후 입력 필드 초기화
 
       // 새로운 메시지를 메시지 목록에 추가
-      const newMessage = { ...messageData, ...response };
-      setMessages((prevMessages) => [...prevMessages, newMessage]);
+      setMessages((prevMessages) => [...prevMessages, response]);
 
-      navigate(`/messages/${chatRoom}`); 
+      // console.log(selectedUser);
+      setMessageContent('');
+      navigate(`/messages/${chatRoomId}`);
     } catch (error) {
       console.error('메시지 전송 실패:', error);
     }
@@ -50,8 +63,12 @@ const MessageRoom = ({ selectedUser, messages, setMessages, chatRoom }) => {
   return (
     <div className="messageroom">
       <div className="user_container">
-        <img className="profile_image1" />
-        <div className="user_name_one">User_Name</div>
+        <img
+          className="profile_image1"
+          src={selectedUser?.profileImageUrl}
+          alt="Profile"
+        />
+        <div className="user_name_one">{selectedUser?.name}</div>
         <img
           className="profile_detail"
           src="../src/assets/message/material-symbols_info-outline.png"
@@ -60,17 +77,23 @@ const MessageRoom = ({ selectedUser, messages, setMessages, chatRoom }) => {
       </div>
 
       <div className="user_info">
-        <img className="profile_image2" />
+        <img
+          className="profile_image2"
+          src={selectedUser?.profileImageUrl}
+          alt="Profile"
+        />
         <div className="user_name_two">{selectedUser?.name}</div>
         <div className="user_status">{selectedUser?.email} • petstagram</div>
         <button className="profile_btn">프로필 보기</button>
       </div>
 
       <div className="message_list">
-        {filteredMessages.map((msg, index) => (
+        {messages.map((msg, index) => (
           <div
             key={index}
-            className={`message ${msg.sender ? 'receive' : 'send'}`}
+            className={`text ${
+              msg.senderId === msg.receiverId ? 'sent' : 'received'
+            }`}
           >
             {msg.messageContent}
           </div>
