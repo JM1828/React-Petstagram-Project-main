@@ -3,7 +3,7 @@ import './MessageRoom.css';
 import ChatRoomService from '../service/ChatRoomService';
 import { useNavigate } from 'react-router-dom';
 
-const MessageRoom = ({ selectedUser, chatRoomId }) => {
+const MessageRoom = ({ selectedUser, chatRoomId, chatSelectedUser }) => {
   const [messageContent, setMessageContent] = useState(''); // 메시지 입력 상태 관리
   const [messages, setMessages] = useState([]);
   const navigate = useNavigate();
@@ -60,6 +60,17 @@ const MessageRoom = ({ selectedUser, chatRoomId }) => {
     }
   };
 
+  const displayName =
+    selectedUser?.name || chatSelectedUser?.receiverName || 'Unknown User';
+  const displayEmail =
+    selectedUser?.email ||
+    chatSelectedUser?.receiverEmail ||
+    'No Email Provided';
+  const displayImageUrl =
+    selectedUser?.profileImageUrl ||
+    chatSelectedUser?.profileImageUrl ||
+    'default-profile.png';
+
   return (
     <div className="messageroom">
       <div className="user_container">
@@ -68,7 +79,9 @@ const MessageRoom = ({ selectedUser, chatRoomId }) => {
           src={selectedUser?.profileImageUrl}
           alt="Profile"
         />
-        <div className="user_name_one">{selectedUser?.name}</div>
+        <div className="user_name_one">
+          {selectedUser?.name && chatSelectedUser?.receiverName}
+        </div>
         <img
           className="profile_detail"
           src="../src/assets/message/material-symbols_info-outline.png"
@@ -82,8 +95,12 @@ const MessageRoom = ({ selectedUser, chatRoomId }) => {
           src={selectedUser?.profileImageUrl}
           alt="Profile"
         />
-        <div className="user_name_two">{selectedUser?.name}</div>
-        <div className="user_status">{selectedUser?.email} • petstagram</div>
+        <div className="user_name_two">
+          {selectedUser?.name && chatSelectedUser?.receiverName}
+        </div>
+        <div className="user_status">
+          {selectedUser?.email && chatSelectedUser?.receiverEmail} • petstagram
+        </div>
         <button className="profile_btn">프로필 보기</button>
       </div>
 

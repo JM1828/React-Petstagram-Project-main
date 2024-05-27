@@ -10,17 +10,19 @@ const Message = () => {
   const { allUserProfiles } = useAllUserProfile();
   const [chatRoomId, setChatRoomId] = useState(null); // 채팅방 ID를 저장할 상태
   const [selectedUser, setSelectedUser] = useState(null); // 선택된 사용자 저장할 상태
-  const { profileInfo, isLoggedIn } = useUserProfile();
+  const [chatSelectedUser, setChatSelectedUser] = useState(null);
+  const { profileInfo } = useUserProfile();
   const navigate = useNavigate();
 
   // 채팅방 생성
   const handleSelectedUser = async (user) => {
     console.log('채팅방 생성 유저' + user);
-    console.log('현재 로그인한 유저' + isLoggedIn);
+    console.log('현재 로그인한 유저' + profileInfo.id);
     setSelectedUser(user);
 
     const chatRoomDTO = {
-      userIds: [user.id],
+      senderId: profileInfo.id, // 현재 로그인한 사용자의 ID
+      receiverId: user.id, // 선택된 사용자의 ID
     };
 
     try {
@@ -37,8 +39,8 @@ const Message = () => {
 
     try {
       const response = await ChatRoomService.getChatRoomById(chatRoomId);
-      console.log("선택된 유저" + response.users[0]);
-      setSelectedUser(response.users[0]); // 여러 사용자 목록 저장
+      console.log('선택된 유저' + response);
+      setChatSelectedUser(response);
       navigate(`/messages/${chatRoomId}`);
     } catch (error) {
       console.error('Error fetching chat room user:', error);
@@ -53,10 +55,7 @@ const Message = () => {
         handleUserClick={handleUserClick}
         profileInfo={profileInfo}
       />
-      <MessageRoom
-        selectedUser={selectedUser}
-        chatRoomId={chatRoomId}
-      />
+      <MessageRoom selectedUser={selectedUser} chatRoomId={chatRoomId} chatSelectedUser={chatSelectedUser} />
     </div>
   );
 };
