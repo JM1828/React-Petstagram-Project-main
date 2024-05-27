@@ -103,6 +103,7 @@ const MessageList = ({
   allUserProfiles,
   handleSelectedUser,
   handleUserClick,
+  profileInfo,
 }) => {
   const userProfilesArray = Array.isArray(allUserProfiles)
     ? allUserProfiles
@@ -117,7 +118,6 @@ const MessageList = ({
     const fetchChatMessageList = async () => {
       try {
         const response = await ChatRoomService.getChatRoomList();
-        console.log(response);
         setChatMessageList(response);
       } catch (error) {
         console.error('Error fetching chat message list:', error);
@@ -188,14 +188,14 @@ const MessageList = ({
             <div className="Message_post-ellipse" />
             <img className="Message_ellipse" />
             <div className="Message_message_info">
-              {/* 채팅방에 참여하는 모든 사용자 이름 표시 */}
-              {chatRoom.userNames.map((userName, index) => (
-                <div key={index} className="Message_user_name">
-                  {userName}
-                </div>
-              ))}
+              {/* 송신자가 로그인한 사용자인 경우 수신자의 이름 표시 */}
+              <div className="Message_user_name">
+                {chatRoom.messages[0].senderId === profileInfo.id
+                  ? chatRoom.messages[0].receiverName
+                  : chatRoom.messages[0].senderName}
+              </div>
+              {/* 채팅방의 첫 번째 메시지 표시 */}
               <div className="Message_message_text">
-                {/* 채팅방의 첫 번째 메시지 표시 */}
                 {chatRoom.messages.length > 0
                   ? chatRoom.messages[0].messageContent
                   : '메시지가 없습니다.'}

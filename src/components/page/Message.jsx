@@ -3,17 +3,20 @@ import useAllUserProfile from '../hook/useAllUserProfile';
 import MessageList from '../common/MessageList';
 import MessageRoom from '../common/MessageRoom';
 import ChatRoomService from '../service/ChatRoomService';
+import useUserProfile from '../hook/useUserProfile';
 import { useNavigate } from 'react-router-dom';
 
 const Message = () => {
   const { allUserProfiles } = useAllUserProfile();
   const [chatRoomId, setChatRoomId] = useState(null); // 채팅방 ID를 저장할 상태
   const [selectedUser, setSelectedUser] = useState(null); // 선택된 사용자 저장할 상태
+  const { profileInfo, isLoggedIn } = useUserProfile();
   const navigate = useNavigate();
 
   // 채팅방 생성
   const handleSelectedUser = async (user) => {
     console.log('채팅방 생성 유저' + user);
+    console.log('현재 로그인한 유저' + isLoggedIn);
     setSelectedUser(user);
 
     const chatRoomDTO = {
@@ -34,7 +37,7 @@ const Message = () => {
 
     try {
       const response = await ChatRoomService.getChatRoomById(chatRoomId);
-      console.log('선택된 채팅방 유저' + response.users[0]);
+      console.log("선택된 유저" + response.users[0]);
       setSelectedUser(response.users[0]); // 여러 사용자 목록 저장
       navigate(`/messages/${chatRoomId}`);
     } catch (error) {
@@ -48,8 +51,12 @@ const Message = () => {
         allUserProfiles={allUserProfiles}
         handleSelectedUser={handleSelectedUser}
         handleUserClick={handleUserClick}
+        profileInfo={profileInfo}
       />
-      <MessageRoom selectedUser={selectedUser} chatRoomId={chatRoomId} />
+      <MessageRoom
+        selectedUser={selectedUser}
+        chatRoomId={chatRoomId}
+      />
     </div>
   );
 };
