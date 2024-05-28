@@ -4,7 +4,7 @@ import ChatRoomService from '../service/ChatRoomService';
 import { useNavigate } from 'react-router-dom';
 
 const MessageRoom = ({ selectedUser, chatRoomId, profileInfo }) => {
-  const [messageContent, setMessageContent] = useState(''); // 메시지 입력 상태 관리
+  const [messageContent, setMessageContent] = useState('');
   const [messages, setMessages] = useState([]);
   const navigate = useNavigate();
 
@@ -14,7 +14,6 @@ const MessageRoom = ({ selectedUser, chatRoomId, profileInfo }) => {
     const fetchMessages = async () => {
       try {
         const response = await ChatRoomService.chatRoomMessages(chatRoomId);
-        console.log('채팅방 메시지 내역' + response.messages);
         setMessages(response.messages);
       } catch (error) {
         console.error('Error fetching messages:', error);
@@ -54,9 +53,8 @@ const MessageRoom = ({ selectedUser, chatRoomId, profileInfo }) => {
       // 새로운 메시지를 메시지 목록에 추가
       setMessages((prevMessages) => [...prevMessages, response]);
 
-      // console.log(selectedUser);
       setMessageContent('');
-      navigate(`/messages/${chatRoomId}`);
+    //   navigate(`/messages/${chatRoomId}`);
     } catch (error) {
       console.error('메시지 전송 실패:', error);
     }
@@ -65,11 +63,7 @@ const MessageRoom = ({ selectedUser, chatRoomId, profileInfo }) => {
   return (
     <div className="messageroom">
       <div className="user_container">
-        <img
-          className="profile_image1"
-          src={selectedUser?.profileImageUrl}
-          alt="Profile"
-        />
+        <img className="profile_image1" src={selectedUser?.profileImageUrl} />
         <div className="user_name_one">{selectedUser?.name}</div>
         <img
           className="profile_detail"
@@ -79,14 +73,17 @@ const MessageRoom = ({ selectedUser, chatRoomId, profileInfo }) => {
       </div>
 
       <div className="user_info">
-        <img
-          className="profile_image2"
-          src={selectedUser?.profileImageUrl}
-          alt="Profile"
-        />
+        <img className="profile_image2" src={selectedUser?.profileImageUrl} />
         <div className="user_name_two">{selectedUser?.name}</div>
         <div className="user_status">{selectedUser?.email} • petstagram</div>
-        <button className="profile_btn">프로필 보기</button>
+        <button
+          className="profile_btn"
+          onClick={() => {
+            selectedUser?.id;
+          }}
+        >
+          프로필 보기
+        </button>
       </div>
 
       <div className="message_list">

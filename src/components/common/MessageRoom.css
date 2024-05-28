@@ -1,11 +1,10 @@
 .messageroom {
     background-color: #fff;
-    position: relative;
+    position: fixed;
     left: 550px; 
     top: 0;
     height: 100vh;
     width: calc(100vw - 550px);
-    z-index: 999; 
     border-left: 1px solid rgb(237, 237, 237);
     overflow: hidden;
 }
@@ -126,3 +125,23 @@
     margin-left: 10px;
     cursor: pointer;
 }
+
+/* 준모가 추가한거 */
+.message_list {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .message {
+    padding: 10px;
+    margin: 5px;
+    border-radius: 10px;
+  }
+  
+  .send {
+    margin-left: auto;
+  }
+  
+  .receive {
+    margin-right: auto;
+  }

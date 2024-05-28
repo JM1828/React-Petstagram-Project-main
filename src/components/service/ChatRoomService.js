@@ -29,18 +29,6 @@ class ChatRoomService {
     return response.data;
   }
 
-  // 이미 존재하는 채팅방이 있는지 확인
-  static async checkChatRoomExists(userId1, userId2) {
-    const token = localStorage.getItem('token');
-    const response = await axios.get(
-      `${this.BASE_URL}/user/chatRooms/exists?userId1=${userId1}&userId2=${userId2}`,
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
-    );
-    return response.data;
-  }
-
   // 채팅방 및 메시지 목록 조회
   static async chatRoomMessages(chatRoomId) {
     const token = localStorage.getItem('token');
@@ -67,6 +55,18 @@ class ChatRoomService {
     const token = localStorage.getItem('token');
     const response = await axios.get(
       `${this.BASE_URL}/user/chatRooms/list/${chatRoomId}`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    return response.data;
+  }
+
+  // 이미 존재하는 채팅방이 있는지 확인
+  static async checkChatRoomExists(userId1, userId2) {
+    const token = localStorage.getItem('token');
+    const response = await axios.get(
+      `${this.BASE_URL}/user/chatRooms/exists?userId1=${userId1}&userId2=${userId2}`,
       {
         headers: { Authorization: `Bearer ${token}` },
       }

@@ -14,6 +14,7 @@ const Overlay = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
+  z-index: 10;
 `;
 
 const Content = styled.div`
@@ -124,7 +125,6 @@ const MessageList = ({
             (chatRoom.senderId === profileInfo.id && chatRoom.id) ||
             (chatRoom.id === profileInfo.id && chatRoom.senderId)
         );
-        console.log('메시지 내역' + filteredChatRooms);
         setChatMessageList(filteredChatRooms);
       } catch (error) {
         console.error('Error fetching chat message list:', error);

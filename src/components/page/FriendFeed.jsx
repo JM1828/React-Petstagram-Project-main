@@ -1,96 +1,159 @@
 import { useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
-import useAllUserProfile from "../hook/useAllUserProfile";
+import useUser from "../hook/useUser";
+import useAllUser from "../hook/useAllUser";
 import PostService from "../service/PostService";
 import "./FriendFeed.css";
-import useUserProfile from "../hook/useUserProfile";
-import useFollowStatus from "../hook/useFollowStatus";
 import useFollowCounts from "../hook/useFollowCounts";
+import useFollowList from "../hook/useFollowList";
+import FriendFollowModal from "../common/FriendFollowListModal";
 
-const FriendFeed = () => {
+const FriendFeed = ({
+    handleFollow,
+    handleUnfollow,
+    isFollowing,
+    myFollowings,
+    myFetchFollowList,
+}) => {
+    const { profileInfo } = useUser();
     const { userId } = useParams();
-    const { allUserProfiles } = useAllUserProfile();
-    const [userProfile, setUserProfile] = useState(null);
+    const { allUserProfiles } = useAllUser();
+    const [friendProfile, setFriendProfile] = useState(null);
     const [postUserList, setPostUserList] = useState([]);
-    const { profileInfo } = useUserProfile();
-    const { handleFollow, handleUnfollow, isFollowing } = useFollowStatus(allUserProfiles, profileInfo);
-    const { followersCount, followingsCount } = useFollowCounts(userProfile ? userProfile.id : null);
+
+    const [isFollowerModalOpen, setFollowerModalOpen] = useState(false);
+    const [isFollowingModalOpen, setFollowingModalOpen] = useState(false);
 
     const getImageUrl = (imageUrl) => {
         return `http://localhost:8088/uploads/${imageUrl}`;
     };
 
     useEffect(() => {
-        const user = allUserProfiles.find((profile) => profile.email === userId);
-        setUserProfile(user);
+        const user = allUserProfiles.find(
+            (profile) => profile.email === userId
+        );
+        setFriendProfile(user);
     }, [userId, allUserProfiles]);
+
+    const { fetchFollowCounts, followersCount, followingsCount } =
+        useFollowCounts(friendProfile ? friendProfile.id : null);
+
+    const { fetchFollowers, fetchFollowings, followers, followings } =
+        useFollowList(friendProfile ? friendProfile.id : null);
 
     useEffect(() => {
         const fetchUserPosts = async () => {
-            if (userProfile && userProfile.id) {
+            if (friendProfile && friendProfile.id) {
                 try {
-                    const postUserList = await PostService.getPostsByUserId(userProfile.id);
+                    const postUserList = await PostService.getPostsByUserId(
+                        friendProfile.id
+                    );
                     setPostUserList(postUserList);
                 } catch (error) {
-                    console.error("사용자가 작성한 게시물을 가져오는 중 오류 발생:", error);
+                    console.error(
+                        "사용자가 작성한 게시물을 가져오는 중 오류 발생:",
+                        error
+                    );
                 }
             }
         };
 
         fetchUserPosts();
-    }, [userProfile]);
+    }, [friendProfile]);
 
-    if (!userProfile) {
+    const isCurrentlyFollowing = isFollowing(friendProfile?.id);
+
+    useEffect(() => {
+        fetchFollowCounts();
+    }, [fetchFollowCounts, isCurrentlyFollowing]);
+
+    if (!friendProfile) {
         return <div>Loading...</div>;
     }
 
     const handleFollowClick = () => {
-        if (isFollowing(userProfile.id)) {
-            handleUnfollow(userProfile.id);
+        if (isFollowing(friendProfile.id)) {
+            handleUnfollow(friendProfile.id);
         } else {
-            handleFollow(userProfile.id);
+            handleFollow(friendProfile.id);
         }
+        fetchFollowCounts();
     };
 
     return (
         <div className="friendfeed-frame">
             <div className="friendfeed-user-info">
                 <div className="friendfeed-user-avatar">
-                    <img src={userProfile.profileImageUrl || ""} alt="User Avatar" />
+                    <img
+                        src={friendProfile.profileImageUrl || ""}
+                        alt="User Avatar"
+                    />
                 </div>
                 <div className="friendfeed-user-main">
                     <div className="friendfeed-user-header">
-                        <h2 className="friendfeed-user-email">{userProfile.email}</h2>
+                        <h2 className="friendfeed-user-email">
+                            {friendProfile.email}
+                        </h2>
                         <div className="friendfeed-user-actions">
-                            {profileInfo.email !== userProfile.email && (
+                            {profileInfo.email !== friendProfile.email && (
                                 <button
-                                    className={`friendfeed-follow-btn ${isFollowing(userProfile.id) ? 'following' : ''}`}
+                                    className={`friendfeed-follow-btn ${
+                                        isFollowing(friendProfile.id)
+                                            ? "following"
+                                            : ""
+                                    }`}
                                     onClick={handleFollowClick}
                                 >
-                                    {isFollowing(userProfile.id) ? '팔로잉' : '팔로우'}
+                                    {isFollowing(friendProfile.id)
+                                        ? "팔로잉"
+                                        : "팔로우"}
                                 </button>
                             )}
-                            <button className="friendfeed-dm-btn">메시지 보내기</button>
-                            <button className="friendfeed-settings-btn"><span>⚙️</span></button>
+                            <button className="friendfeed-dm-btn">
+                                메시지 보내기
+                            </button>
+                            <button className="friendfeed-settings-btn">
+                                <span>⚙️</span>
+                            </button>
                         </div>
                     </div>
                     <div className="friendfeed-user-stats">
                         <div className="friendfeed-user-stat">
-                            <span className="friendfeed-stat-label">게시물</span>
-                            <span className="friendfeed-stat-number">{postUserList.length}</span>
+                            <span className="friendfeed-stat-label">
+                                게시물
+                            </span>
+                            <span className="friendfeed-stat-number">
+                                {postUserList.length}
+                            </span>
                         </div>
-                        <div className="friendfeed-user-stat">
-                            <span className="friendfeed-stat-label">팔로워</span>
-                            <span className="friendfeed-stat-number">{followersCount}</span>
+                        <div
+                            className="friendfeed-user-stat"
+                            onClick={() => setFollowerModalOpen(true)}
+                        >
+                            <span className="friendfeed-stat-label">
+                                팔로워
+                            </span>
+                            <span className="friendfeed-stat-number">
+                                {followersCount}
+                            </span>
                         </div>
-                        <div className="friendfeed-user-stat">
-                            <span className="friendfeed-stat-label">팔로우</span>
-                            <span className="friendfeed-stat-number">{followingsCount}</span>
+                        <div
+                            className="friendfeed-user-stat"
+                            onClick={() => setFollowingModalOpen(true)}
+                        >
+                            <span className="friendfeed-stat-label">
+                                팔로우
+                            </span>
+                            <span className="friendfeed-stat-number">
+                                {followingsCount}
+                            </span>
                         </div>
                     </div>
                     <div className="friendfeed-user-bio">
-                        <span className="friendfeed-user-profile">{userProfile.name}</span>
-                        {userProfile.bio}
+                        <span className="friendfeed-user-profile">
+                            {friendProfile.name}
+                        </span>
+                        {friendProfile.bio}
                     </div>
                 </div>
             </div>
@@ -109,6 +172,34 @@ const FriendFeed = () => {
                     ))}
                 </div>
             </div>
+            {/* 모달 다시 만들기 */}
+            {isFollowerModalOpen && (
+                <FriendFollowModal
+                    myFollowings={myFollowings}
+                    profileInfo={profileInfo}
+                    fetchFollowList={fetchFollowers}
+                    onClose={() => setFollowerModalOpen(false)}
+                    title="팔로워"
+                    followList={followers}
+                    myFetchFollowList={myFetchFollowList}
+                    handleFollow={handleFollow}
+                    handleUnfollow={handleUnfollow}
+                />
+            )}
+
+            {isFollowingModalOpen && (
+                <FriendFollowModal
+                    myFollowings={myFollowings}
+                    profileInfo={profileInfo}
+                    fetchFollowList={fetchFollowings}
+                    onClose={() => setFollowingModalOpen(false)}
+                    title="팔로잉"
+                    followList={followings}
+                    myFetchFollowList={myFetchFollowList}
+                    handleFollow={handleFollow}
+                    handleUnfollow={handleUnfollow}
+                />
+            )}
         </div>
     );
 };
