@@ -121,16 +121,17 @@ const MessageList = ({
         // 현재 로그인한 사용자의 ID를 기준으로 필터링
         const filteredChatRooms = response.filter(
           (chatRoom) =>
-            (chatRoom.senderId === profileInfo.id && chatRoom.receiverId) ||
-            (chatRoom.receiverId === profileInfo.id && chatRoom.senderId)
+            (chatRoom.senderId === profileInfo.id && chatRoom.id) ||
+            (chatRoom.id === profileInfo.id && chatRoom.senderId)
         );
+        console.log('메시지 내역' + filteredChatRooms);
         setChatMessageList(filteredChatRooms);
       } catch (error) {
         console.error('Error fetching chat message list:', error);
       }
     };
     fetchChatMessageList();
-  }, [profileInfo.id]); // profileInfo.id가 변경될 때마다 useEffect 실행
+  }, [profileInfo.id]);
 
   const handleClose = () => {
     setShowModal(false);
@@ -183,32 +184,37 @@ const MessageList = ({
         />
       </div>
 
-      {Object.values(chatMessageList).length > 0 ? (
-        Object.values(chatMessageList).map((chatRoom) => (
-          <div
-            key={chatRoom.id}
-            className="Message_message_item"
-            onClick={() => handleUserClick(chatRoom.id)}
-          >
-            <div className="Message_post-ellipse" />
-            <img className="Message_ellipse" />
-            <div className="Message_message_info">
-              <div className="Message_user_name">
-                {chatRoom.messages[0].senderId === profileInfo.id
-                  ? chatRoom.messages[0].receiverName
-                  : chatRoom.messages[0].senderName}
-              </div>
-              <div className="Message_message_text">
-                {chatRoom.messages[0].messageContent}
-              </div>
-              <div className="Message_message_time">
-                {GetRelativeTime(
+      {chatMessageList.length > 0 ? (
+        chatMessageList.map((chatRoom) => {
+          const isSender = chatRoom.senderId === profileInfo.id;
+          const otherUser = isSender ? chatRoom.name : chatRoom.senderName;
+          const lastMessage =
+            chatRoom.messages.length > 0
+              ? chatRoom.messages[0].messageContent
+              : '메시지가 없습니다.';
+          const lastMessageTime =
+            chatRoom.messages.length > 0
+              ? GetRelativeTime(
                   chatRoom.messages[chatRoom.messages.length - 1].regTime
-                )}
+                )
+              : '';
+
+          return (
+            <div
+              key={chatRoom.chatRoomId}
+              className="Message_message_item"
+              onClick={() => handleUserClick(chatRoom.chatRoomId)}
+            >
+              <div className="Message_post-ellipse" />
+              <img className="Message_ellipse" />
+              <div className="Message_message_info">
+                <div className="Message_user_name">{otherUser}</div>
+                <div className="Message_message_text">{lastMessage}</div>
+                <div className="Message_message_time">{lastMessageTime}</div>
               </div>
             </div>
-          </div>
-        ))
+          );
+        })
       ) : (
         <div className="Message_message_text">메시지가 없습니다.</div>
       )}

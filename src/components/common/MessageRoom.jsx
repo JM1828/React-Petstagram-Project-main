@@ -3,7 +3,7 @@ import './MessageRoom.css';
 import ChatRoomService from '../service/ChatRoomService';
 import { useNavigate } from 'react-router-dom';
 
-const MessageRoom = ({ selectedUser, chatRoomId, chatSelectedUser }) => {
+const MessageRoom = ({ selectedUser, chatRoomId, profileInfo }) => {
   const [messageContent, setMessageContent] = useState(''); // 메시지 입력 상태 관리
   const [messages, setMessages] = useState([]);
   const navigate = useNavigate();
@@ -14,6 +14,7 @@ const MessageRoom = ({ selectedUser, chatRoomId, chatSelectedUser }) => {
     const fetchMessages = async () => {
       try {
         const response = await ChatRoomService.chatRoomMessages(chatRoomId);
+        console.log('채팅방 메시지 내역' + response.messages);
         setMessages(response.messages);
       } catch (error) {
         console.error('Error fetching messages:', error);
@@ -41,6 +42,7 @@ const MessageRoom = ({ selectedUser, chatRoomId, chatSelectedUser }) => {
 
     const messageData = {
       chatRoomId: chatRoomId,
+      senderId: profileInfo.id,
       receiverId: selectedUser.id,
       messageContent: messageContent,
     };
@@ -60,17 +62,6 @@ const MessageRoom = ({ selectedUser, chatRoomId, chatSelectedUser }) => {
     }
   };
 
-  const displayName =
-    selectedUser?.name || chatSelectedUser?.receiverName || 'Unknown User';
-  const displayEmail =
-    selectedUser?.email ||
-    chatSelectedUser?.receiverEmail ||
-    'No Email Provided';
-  const displayImageUrl =
-    selectedUser?.profileImageUrl ||
-    chatSelectedUser?.profileImageUrl ||
-    'default-profile.png';
-
   return (
     <div className="messageroom">
       <div className="user_container">
@@ -79,9 +70,7 @@ const MessageRoom = ({ selectedUser, chatRoomId, chatSelectedUser }) => {
           src={selectedUser?.profileImageUrl}
           alt="Profile"
         />
-        <div className="user_name_one">
-          {selectedUser?.name && chatSelectedUser?.receiverName}
-        </div>
+        <div className="user_name_one">{selectedUser?.name}</div>
         <img
           className="profile_detail"
           src="../src/assets/message/material-symbols_info-outline.png"
@@ -95,12 +84,8 @@ const MessageRoom = ({ selectedUser, chatRoomId, chatSelectedUser }) => {
           src={selectedUser?.profileImageUrl}
           alt="Profile"
         />
-        <div className="user_name_two">
-          {selectedUser?.name && chatSelectedUser?.receiverName}
-        </div>
-        <div className="user_status">
-          {selectedUser?.email && chatSelectedUser?.receiverEmail} • petstagram
-        </div>
+        <div className="user_name_two">{selectedUser?.name}</div>
+        <div className="user_status">{selectedUser?.email} • petstagram</div>
         <button className="profile_btn">프로필 보기</button>
       </div>
 
