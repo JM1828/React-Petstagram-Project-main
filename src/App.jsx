@@ -1,234 +1,233 @@
-import React from "react";
+import React, { Suspense, lazy } from 'react';
 import {
-    BrowserRouter as Router,
-    Route,
-    Routes,
-    Navigate,
-} from "react-router-dom";
-import "./App.css";
+  BrowserRouter as Router,
+  Route,
+  Routes,
+  Navigate,
+} from 'react-router-dom';
+import { useEffect } from 'react';
+import './App.css';
 
 /* 컨텍스트 */
-import { UserProvider } from "./contexts/UserContext";
-import { AllUserProvider } from "./contexts/AllUserContext";
-import { PostProvider } from "./contexts/PostContext";
-import { NavProvider } from "./contexts/NavContext";
-import { ModalProvider } from "./contexts/ModalContext";
+import { UserProvider } from './contexts/UserContext';
+import { AllUserProvider } from './contexts/AllUserContext';
+import { PostProvider } from './contexts/PostContext';
+import { NavProvider } from './contexts/NavContext';
+import { ModalProvider } from './contexts/ModalContext';
+import { FollowProvider } from './contexts/FollowContext';
+import { CommentProvider } from './contexts/CommentContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 
 /* 컴포넌트 */
-import LoginForm from "./components/page/LoginForm";
-import SignUp from "./components/page/SignUp";
-import Feed from "./components/page/Feed";
-import FriendFeed from "./components/page/FriendFeed";
-import ExploreFeed from "./components/page/ExploreFeed";
-import MyFeed from "./components/page/MyFeed";
-import Message from "./components/page/Message";
-import HomeNav from "./components/common/HomeNav";
-import FriendNav from "./components/common/FriendNav";
-import SearchNav from "./components/common/SearchNav";
-import NotificationNav from "./components/common/NotificationNav";
+const LoginForm = lazy(() => import('./components/page/LoginForm'));
+const SignUp = lazy(() => import('./components/page/SignUp'));
+const Feed = lazy(() => import('./components/page/Feed'));
+const FriendFeed = lazy(() => import('./components/page/FriendFeed'));
+const ExploreFeed = lazy(() => import('./components/page/ExploreFeed'));
+const MyFeed = lazy(() => import('./components/page/MyFeed'));
+const Message = lazy(() => import('./components/page/Message'));
+const HomeNav = lazy(() => import('./components/common/HomeNav'));
+const FriendNav = lazy(() => import('./components/common/FriendNav'));
+const SearchNav = lazy(() => import('./components/common/SearchNav'));
+const NotificationNav = lazy(() =>
+  import('./components/common/NotificationNav')
+);
 
 /* Hook */
-import useUser from "./components/hook/useUser";
-import useNav from "./components/hook/useNav";
-import useFollowStatus from "./components/hook/useFollowStatus";
-import useFollowList from "./components/hook/useFollowList";
+import useUser from './components/hook/useUser';
+import useNav from './components/hook/useNav';
+import useTheme from './components/hook/useTheme';
+import Loading from './components/ui/Loading';
 
 const AppContent = () => {
-    const { isLoggedIn, setIsLoggedIn } = useUser();
-    const { handleFollow, handleUnfollow, isFollowing } = useFollowStatus();
-    const { followers, followings, fetchFollowings } = useFollowList();
-    const { navState } = useNav();
+  const { isLoggedIn, setIsLoggedIn } = useUser();
+  const { navState } = useNav();
+  const { isDarkMode, toggleTheme } = useTheme();
 
-    return (
-        <Router>
-            <Routes>
-                <Route
-                    exact
-                    path="/login"
-                    element={
-                        isLoggedIn ? (
-                            <Navigate to="/" />
-                        ) : (
-                            <LoginForm setIsLoggedIn={setIsLoggedIn} />
-                        )
-                    }
-                />
-                <Route
-                    path="/signup"
-                    element={
-                        isLoggedIn ? (
-                            <Navigate to="/" />
-                        ) : (
-                            <SignUp setIsLoggedIn={setIsLoggedIn} />
-                        )
-                    }
-                />
-                <Route
-                    path="/"
-                    element={
-                        isLoggedIn ? (
-                            <div className="app">
-                                <div className="div">
-                                    {!navState.explore && (
-                                        <>
-                                            <Feed
-                                                isFollowing={isFollowing}
-                                                handleFollow={handleFollow}
-                                                handleUnfollow={handleUnfollow}
-                                                myFollowers={followers}
-                                                myFollowings={followings}
-                                            />
-                                            <FriendNav
-                                                isFollowing={isFollowing}
-                                                handleFollow={handleFollow}
-                                                handleUnfollow={handleUnfollow}
-                                            />
-                                        </>
-                                    )}
-                                    <div className="main-container">
-                                        <HomeNav />
-                                        {navState.search && <SearchNav />}
-                                        {navState.notification && (
-                                            <NotificationNav />
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                        ) : (
-                            <Navigate to="/login" />
-                        )
-                    }
-                />
-                <Route
-                    path="/explore"
-                    element={
-                        isLoggedIn ? (
-                            <div className="app">
-                                <div className="div">
-                                    <ExploreFeed />
-                                    <div className="main-container">
-                                        <HomeNav />
-                                        {navState.search && <SearchNav />}
-                                        {navState.notification && (
-                                            <NotificationNav />
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                        ) : (
-                            <Navigate to="/login" />
-                        )
-                    }
-                />
-                <Route
-                    path="/messages"
-                    element={
-                        isLoggedIn ? (
-                            <div className="app">
-                                <div className="div">
-                                    <Message />
-                                    <div className="main-container">
-                                        <HomeNav />
-                                        {navState.search && <SearchNav />}
-                                        {navState.notification && (
-                                            <NotificationNav />
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                        ) : (
-                            <Navigate to="/login" />
-                        )
-                    }
-                />
-                {/* 준모가 라우터 떄문에 하나더 만들었음 */}
-                <Route
-                    path="/messages/:ChatRoomId"
-                    element={
-                        isLoggedIn ? (
-                            <div className="app">
-                                <div className="div">
-                                    <Message />
-                                    <div className="main-container">
-                                        <HomeNav />
-                                        {navState.search && <SearchNav />}
-                                        {navState.notification && (
-                                            <NotificationNav />
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                        ) : (
-                            <Navigate to="/login" />
-                        )
-                    }
-                />
-                {/* 여기까지 */}
-                <Route
-                    path="/profile"
-                    element={
-                        isLoggedIn ? (
-                            <div className="app">
-                                <div className="div">
-                                    <MyFeed />
-                                    <div className="main-container">
-                                        <HomeNav />
-                                        {navState.search && <SearchNav />}
-                                        {navState.notification && (
-                                            <NotificationNav />
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                        ) : (
-                            <Navigate to="/login" />
-                        )
-                    }
-                />
-                <Route
-                    path="/friendfeed/:userId"
-                    element={
-                        isLoggedIn ? (
-                            <div className="app">
-                                <div className="div">
-                                    <FriendFeed
-                                        isFollowing={isFollowing}
-                                        handleFollow={handleFollow}
-                                        handleUnfollow={handleUnfollow}
-                                        myFollowings={followings}
-                                        myFetchFollowList={fetchFollowings}
-                                    />
-                                    <div className="main-container">
-                                        <HomeNav />
-                                        {navState.search && <SearchNav />}
-                                        {navState.notification && (
-                                            <NotificationNav />
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                        ) : (
-                            <Navigate to="/login" />
-                        )
-                    }
-                />
-            </Routes>
-        </Router>
-    );
+  useEffect(() => {
+    if (isDarkMode) {
+      document.body.classList.add('dark-mode');
+    } else {
+      document.body.classList.remove('dark-mode');
+    }
+  }, [isDarkMode]);
+
+  return (
+    <Router>
+      <Suspense
+        fallback={
+          <div>
+            <Loading />
+          </div>
+        }
+      >
+        <Routes>
+          <Route
+            exact
+            path="/login"
+            element={
+              isLoggedIn ? (
+                <Navigate to="/" />
+              ) : (
+                <LoginForm setIsLoggedIn={setIsLoggedIn} />
+              )
+            }
+          />
+          <Route
+            path="/signup"
+            element={
+              isLoggedIn ? (
+                <Navigate to="/" />
+              ) : (
+                <SignUp setIsLoggedIn={setIsLoggedIn} />
+              )
+            }
+          />
+          <Route
+            path="/"
+            element={
+              isLoggedIn ? (
+                <div className="app">
+                  <div className="div">
+                    {!navState.explore && (
+                      <>
+                        <Feed />
+                        <FriendNav />
+                      </>
+                    )}
+                    <div className="main-container">
+                      <HomeNav toggleTheme={toggleTheme} />
+                      {navState.search && <SearchNav />}
+                      {navState.notification && <NotificationNav />}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <Navigate to="/login" />
+              )
+            }
+          />
+          <Route
+            path="/explore"
+            element={
+              isLoggedIn ? (
+                <div className="app">
+                  <div className="div">
+                    <ExploreFeed />
+                    <div className="main-container">
+                      <HomeNav />
+                      {navState.search && <SearchNav />}
+                      {navState.notification && <NotificationNav />}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <Navigate to="/login" />
+              )
+            }
+          />
+          <Route
+            path="/messages"
+            element={
+              isLoggedIn ? (
+                <div className="app">
+                  <div className="div">
+                    <Message />
+                    <div className="main-container">
+                      <HomeNav />
+                      {navState.search && <SearchNav />}
+                      {navState.notification && <NotificationNav />}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <Navigate to="/login" />
+              )
+            }
+          />
+          {/* 준모가 경로 떄문에 하나더 만들었음 */}
+          <Route
+            path="/messages/:ChatRoomId"
+            element={
+              isLoggedIn ? (
+                <div className="app">
+                  <div className="div">
+                    <Message />
+                    <div className="main-container">
+                      <HomeNav />
+                      {navState.search && <SearchNav />}
+                      {navState.notification && <NotificationNav />}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <Navigate to="/login" />
+              )
+            }
+          />
+          {/* 여기까지 */}
+          <Route
+            path="/profile"
+            element={
+              isLoggedIn ? (
+                <div className="app">
+                  <div className="div">
+                    <MyFeed />
+                    <div className="main-container">
+                      <HomeNav />
+                      {navState.search && <SearchNav />}
+                      {navState.notification && <NotificationNav />}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <Navigate to="/login" />
+              )
+            }
+          />
+          <Route
+            path="/friendfeed/:userId"
+            element={
+              isLoggedIn ? (
+                <div className="app">
+                  <div className="div">
+                    <FriendFeed />
+                    <div className="main-container">
+                      <HomeNav />
+                      {navState.search && <SearchNav />}
+                      {navState.notification && <NotificationNav />}
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <Navigate to="/login" />
+              )
+            }
+          />
+        </Routes>
+      </Suspense>
+    </Router>
+  );
 };
 
 const App = () => (
-    <UserProvider>
-        <AllUserProvider>
-            <NavProvider>
-                <ModalProvider>
-                    <PostProvider>
-                        <AppContent />
-                    </PostProvider>
-                </ModalProvider>
-            </NavProvider>
-        </AllUserProvider>
-    </UserProvider>
+  <UserProvider>
+    <AllUserProvider>
+      <NavProvider>
+        <PostProvider>
+          <CommentProvider>
+            <FollowProvider>
+              <ModalProvider>
+                <ThemeProvider>
+                  <AppContent />
+                </ThemeProvider>
+              </ModalProvider>
+            </FollowProvider>
+          </CommentProvider>
+        </PostProvider>
+      </NavProvider>
+    </AllUserProvider>
+  </UserProvider>
 );
 
 export default App;

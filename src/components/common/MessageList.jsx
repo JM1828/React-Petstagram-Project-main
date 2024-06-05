@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import './MessageList.css';
 import styled from 'styled-components';
 import GetRelativeTime from '../../utils/GetRelativeTime';
-import ChatRoomService from '../service/ChatRoomService';
+import useUser from '../hook/useUser';
 
 const Overlay = styled.div`
   position: fixed;
@@ -102,36 +102,19 @@ const SelectButton = styled.button`
 
 const MessageList = ({
   allUserProfiles,
-  handleSelectedUser,
-  handleUserClick,
   profileInfo,
+  handleSelectedUser,
+  setSelectedUser,
+  selectedUser,
+  chatMessageList,
+  handleUserClick,
 }) => {
   const userProfilesArray = Array.isArray(allUserProfiles)
     ? allUserProfiles
     : [];
   const [showModal, setShowModal] = useState(false);
   const [searchText, setSearchText] = useState('');
-  const [selectedUser, setSelectedUser] = useState(null);
-  const [chatMessageList, setChatMessageList] = useState([]);
-
-  // 채팅방 리스트 가져오기
-  useEffect(() => {
-    const fetchChatMessageList = async () => {
-      try {
-        const response = await ChatRoomService.getChatRoomList();
-        // 현재 로그인한 사용자의 ID를 기준으로 필터링
-        const filteredChatRooms = response.filter(
-          (chatRoom) =>
-            (chatRoom.senderId === profileInfo.id && chatRoom.id) ||
-            (chatRoom.id === profileInfo.id && chatRoom.senderId)
-        );
-        setChatMessageList(filteredChatRooms);
-      } catch (error) {
-        console.error('Error fetching chat message list:', error);
-      }
-    };
-    fetchChatMessageList();
-  }, [profileInfo.id]);
+  const { getProfileImageUrl } = useUser();
 
   const handleClose = () => {
     setShowModal(false);
@@ -149,6 +132,15 @@ const MessageList = ({
     setSelectedUser(user);
   };
 
+  const handleCreateChatRoom = () => {
+    if (selectedUser) {
+      handleSelectedUser(selectedUser);
+      handleClose();
+    } else {
+      console.warn('선택된 사용자가 없습니다.');
+    }
+  };
+
   const getSearchUsers = () => {
     if (searchText === '') {
       return [];
@@ -162,15 +154,6 @@ const MessageList = ({
   };
 
   const searchResults = getSearchUsers();
-
-  const handleCreateChatRoom = () => {
-    if (selectedUser) {
-      handleSelectedUser(selectedUser);
-      handleClose();
-    } else {
-      console.warn('선택된 사용자가 없습니다.');
-    }
-  };
 
   return (
     <div className="messagelist">
@@ -187,26 +170,53 @@ const MessageList = ({
       {chatMessageList.length > 0 ? (
         chatMessageList.map((chatRoom) => {
           const isSender = chatRoom.senderId === profileInfo.id;
-          const otherUser = isSender ? chatRoom.name : chatRoom.senderName;
+          const otherUser = isSender
+            ? chatRoom.receiverName
+            : chatRoom.senderName;
+
           const lastMessage =
             chatRoom.messages.length > 0
-              ? chatRoom.messages[0].messageContent
+              ? chatRoom.messages[0].imageList &&
+                chatRoom.messages[0].imageList.length > 0
+                ? chatRoom.messages[0].senderId === profileInfo.id
+                  ? '나: 사진을 보냈습니다.'
+                  : '사진을 보냈습니다.'
+                : chatRoom.messages[0].senderId === profileInfo.id
+                ? `나: ${chatRoom.messages[0].messageContent}`
+                : chatRoom.messages[0].messageContent
               : '메시지가 없습니다.';
+
           const lastMessageTime =
             chatRoom.messages.length > 0
-              ? GetRelativeTime(
-                  chatRoom.messages[chatRoom.messages.length - 1].regTime
-                )
+              ? chatRoom.messages[0].regTime
               : '';
+
+          // 발신자로 로그인했을 때와 수신자로 로그인했을 때 프로필 이미지 다르게 표시
+          let profileImageUrl;
+          if (isSender) {
+            profileImageUrl = getProfileImageUrl(
+              allUserProfiles.find((user) => user.id === chatRoom.receiverId)
+                ?.profileImage
+            );
+          } else {
+            profileImageUrl = getProfileImageUrl(
+              allUserProfiles.find((user) => user.id === chatRoom.senderId)
+                ?.profileImage
+            );
+          }
 
           return (
             <div
-              key={chatRoom.chatRoomId}
+              key={chatRoom.id}
               className="Message_message_item"
-              onClick={() => handleUserClick(chatRoom.chatRoomId)}
+              onClick={() => handleUserClick(chatRoom.id)}
             >
               <div className="Message_post-ellipse" />
-              <img className="Message_ellipse" />
+              <img
+                className="Message_ellipse"
+                src={profileImageUrl}
+                alt="Profile"
+              />
               <div className="Message_message_info">
                 <div className="Message_user_name">{otherUser}</div>
                 <div className="Message_message_text">{lastMessage}</div>
