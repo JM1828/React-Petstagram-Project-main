@@ -8,7 +8,6 @@ const UserContext = createContext();
 export const UserProvider = ({ children }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(UserService.isAuthenticated());
   const [profileInfo, setProfileInfo] = useState({});
-  const [selectedUserProfile, setSelectedUserProfile] = useState({});
 
   const getProfileImageUrl = (profileImage) => {
     if (profileImage && profileImage.imageUrl) {
@@ -28,23 +27,6 @@ export const UserProvider = ({ children }) => {
       setProfileInfo(profileWithImageUrl);
     } catch (error) {
       console.error('프로필 정보를 가져오는 중 오류 발생:', error);
-    }
-  }, []);
-
-  const fetchSelectedUserProfile = useCallback(async (userId) => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await UserService.getUserProfile(userId, token);
-      const profileWithImageUrl = {
-        ...response,
-        profileImageUrl: getProfileImageUrl(response.profileImage),
-      };
-      setSelectedUserProfile(profileWithImageUrl);
-    } catch (error) {
-      console.error(
-        '선택한 유저의 프로필 정보를 가져오는 중 오류 발생:',
-        error
-      );
     }
   }, []);
 
@@ -72,8 +54,6 @@ export const UserProvider = ({ children }) => {
         setIsLoggedIn,
         profileInfo,
         fetchProfileInfo,
-        selectedUserProfile,
-        fetchSelectedUserProfile,
         getProfileImageUrl,
       }}
     >

@@ -3,6 +3,9 @@ import './MessageList.css';
 import styled from 'styled-components';
 import GetRelativeTime from '../../utils/GetRelativeTime';
 import useUser from '../hook/useUser';
+import useChatRoom from '../hook/useChatRoom';
+import useAllUser from '../hook/useAllUser';
+import { useNavigate } from 'react-router-dom';
 
 const Overlay = styled.div`
   position: fixed;
@@ -100,21 +103,23 @@ const SelectButton = styled.button`
   text-align: center;
 `;
 
-const MessageList = ({
-  allUserProfiles,
-  profileInfo,
-  handleSelectedUser,
-  setSelectedUser,
-  selectedUser,
-  chatMessageList,
-  handleUserClick,
-}) => {
+const MessageList = () => {
+  const [showModal, setShowModal] = useState(false);
+  const [searchText, setSearchText] = useState('');
+  const {
+    handleSelectedUser,
+    chatMessageList,
+    handleUserClick,
+    selectedUser,
+    setSelectedUser,
+  } = useChatRoom();
+  const { allUserProfiles } = useAllUser();
+  const { profileInfo, getProfileImageUrl } = useUser();
+  const navigate = useNavigate();
+
   const userProfilesArray = Array.isArray(allUserProfiles)
     ? allUserProfiles
     : [];
-  const [showModal, setShowModal] = useState(false);
-  const [searchText, setSearchText] = useState('');
-  const { getProfileImageUrl } = useUser();
 
   const handleClose = () => {
     setShowModal(false);
@@ -132,10 +137,18 @@ const MessageList = ({
     setSelectedUser(user);
   };
 
-  const handleCreateChatRoom = () => {
+  const handleChatRoomUserClick = (chatRoomId) => {
+    handleUserClick(chatRoomId);
+    navigate(`/messages/${chatRoomId}`);
+  };
+
+  const handleCreateChatRoom = async () => {
     if (selectedUser) {
-      handleSelectedUser(selectedUser);
-      handleClose();
+      const chatRoomId = await handleSelectedUser(selectedUser);
+      if (chatRoomId) {
+        navigate(`/messages/${chatRoomId}`);
+        handleClose();
+      }
     } else {
       console.warn('선택된 사용자가 없습니다.');
     }
@@ -188,7 +201,7 @@ const MessageList = ({
 
           const lastMessageTime =
             chatRoom.messages.length > 0
-              ? chatRoom.messages[0].regTime
+              ? GetRelativeTime(chatRoom.messages[0].regTime)
               : '';
 
           // 발신자로 로그인했을 때와 수신자로 로그인했을 때 프로필 이미지 다르게 표시
@@ -209,7 +222,7 @@ const MessageList = ({
             <div
               key={chatRoom.id}
               className="Message_message_item"
-              onClick={() => handleUserClick(chatRoom.id)}
+              onClick={() => handleChatRoomUserClick(chatRoom.id)}
             >
               <div className="Message_post-ellipse" />
               <img

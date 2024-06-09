@@ -4,6 +4,8 @@ import { sendMessageWithImage } from '../service/ChatWebSocketService.js';
 import styled from 'styled-components';
 import ChatRoomService from '../service/ChatRoomService';
 import { Link } from 'react-router-dom';
+import useChatRoom from '../hook/useChatRoom';
+import useUser from '../hook/useUser';
 
 // 이모지 선택창 스타일
 const EmojiPickerModal = styled.div`
@@ -54,10 +56,12 @@ const EmojiPicker = ({ onEmojiClick }) => (
   </EmojiPickerModal>
 );
 
-const MessageRoom = ({ selectedUser, chatRoomId, profileInfo, messages }) => {
+const MessageRoom = () => {
   const [messageContent, setMessageContent] = useState('');
   const [selectedImage, setSelectedImage] = useState(null);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const { selectedUser, chatRoomId, messages } = useChatRoom();
+  const { profileInfo } = useUser();
   const fileInputRef = useRef(null);
 
   const getImageUrl = (image) => {
@@ -148,7 +152,7 @@ const MessageRoom = ({ selectedUser, chatRoomId, profileInfo, messages }) => {
         <div className="user_name_two">{selectedUser?.name}</div>
         <div className="user_status">{selectedUser?.email} • petstagram</div>
         <button className="profile_btn">
-          <Link to={`/profile/${selectedUser?.id}`}>프로필 보기</Link>
+          <Link to={`/friendfeed/${selectedUser?.id}`}>프로필 보기</Link>
         </button>
       </div>
 

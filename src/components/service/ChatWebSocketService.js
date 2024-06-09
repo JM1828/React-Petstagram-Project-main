@@ -30,7 +30,6 @@ export const connect = (
       // 채팅방 리스트 구독 설정
       stompClient.subscribe(`/sub/chatRoomList/${userEmail}`, (message) => {
         const chatRoomList = JSON.parse(message.body);
-        console.log("이게 머에요?" + chatRoomList)
         onChatRoomListUpdate(chatRoomList);
       });
     },

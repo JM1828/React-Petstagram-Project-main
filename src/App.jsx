@@ -17,6 +17,7 @@ import { ModalProvider } from './contexts/ModalContext';
 import { FollowProvider } from './contexts/FollowContext';
 import { CommentProvider } from './contexts/CommentContext';
 import { ThemeProvider } from './contexts/ThemeContext';
+import { ChatRoomProvider } from './contexts/ChatRoomContext';
 
 /* 컴포넌트 */
 const LoginForm = lazy(() => import('./components/page/LoginForm'));
@@ -219,7 +220,9 @@ const App = () => (
             <FollowProvider>
               <ModalProvider>
                 <ThemeProvider>
-                  <AppContent />
+                  <ChatRoomProvider>
+                    <AppContent />
+                  </ChatRoomProvider>
                 </ThemeProvider>
               </ModalProvider>
             </FollowProvider>

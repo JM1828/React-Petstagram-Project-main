@@ -29,17 +29,6 @@ class UserService {
     return response.data;
   }
 
-  // 유저 마이페이지
-  static async getUserProfile(userId, token) {
-    const response = await axios.get(
-      `${UserService.BASE_URL}/user/profile/${userId}`,
-      {
-        headers: { Authorization: `Bearer ${token}` },
-      }
-    );
-    return response.data;
-  }
-
   // 회원 수정
   static async updateUser(userId, formData, token) {
     const response = await axios.put(

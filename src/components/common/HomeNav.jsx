@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import useUser from '../hook/useUser';
 import useModal from '../hook/useModal';
 import useNav from '../hook/useNav';
+import useChatRoom from '../hook/useChatRoom';
 import SelectUpload from '../ui/SelectUpload';
 
 import icons from '../../assets/ImageList';
@@ -14,6 +15,7 @@ const HomeNav = () => {
   const { openModal, closeModal, isModalOpen } = useModal();
   const { navState, handleNavClick, handleMenuClick, isCollapsed } = useNav();
   const navigate = useNavigate();
+  const { unreadMessages, receivedMessageCount } = useChatRoom();
 
   return (
     <div className="home-nav-container">
