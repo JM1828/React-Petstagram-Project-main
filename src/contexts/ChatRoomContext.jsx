@@ -79,7 +79,8 @@ export const ChatRoomProvider = ({ children }) => {
             existingChatRoom.id
           );
           setMessages(response.messages);
-          return existingChatRoom.id; // 기존 채팅방 ID 반환
+          setChatRoomId(existingChatRoom.id);
+          return existingChatRoom.id;
         } catch (error) {
           console.error('메시지 내역 가져오기 실패:', error);
         }
@@ -91,6 +92,7 @@ export const ChatRoomProvider = ({ children }) => {
         try {
           const response = await ChatRoomService.createChatRoom(chatRoomDTO);
           setChatRoomId(response.id);
+          return response.id;
         } catch (error) {
           console.error('채팅방 생성 실패:', error);
         }
@@ -105,36 +107,21 @@ export const ChatRoomProvider = ({ children }) => {
       try {
         const response = await ChatRoomService.chatRoomMessagesWithInfo(
           chatRoomId
-        );
-        setMessages(response.messages);
-
-        const isSender = response.senderId === profileInfo.id;
-        const selectedUser = isSender
+          );
+          setMessages(response.messages.reverse());
+          
+          const isSender = response.senderId === profileInfo.id;
+          const selectedUser = isSender
           ? allUserProfiles.find((user) => user.id === response.receiverId)
           : allUserProfiles.find((user) => user.id === response.senderId);
-
-        setSelectedUser(selectedUser);
-        setChatRoomId(chatRoomId);
+          
+          setSelectedUser(selectedUser);
+          setChatRoomId(chatRoomId);
       } catch (error) {
         console.error('메시지와 채팅방 정보를 가져오는 중 오류 발생:', error);
       }
     },
     [profileInfo.id, allUserProfiles]
-  );
-
-  // 채팅방을 클릭하여 메시지를 읽었다는 정보를 서버로 전송하는 함수
-  const markChatRoomAsRead = useCallback(
-    async (chatRoomId) => {
-      try {
-        await ChatRoomService.markChatRoomAsRead(chatRoomId); // 채팅방을 읽었다는 정보 전달
-        // 메시지 개수를 업데이트
-        const newMessageCount = receivedMessageCount - 1; // 읽은 메시지가 하나 줄었으므로 1을 빼줍니다.
-        setReceivedMessageCount(newMessageCount);
-      } catch (error) {
-        console.error('Failed to mark chat room as read:', error);
-      }
-    },
-    [receivedMessageCount, setReceivedMessageCount]
   );
 
   return (
@@ -151,7 +138,6 @@ export const ChatRoomProvider = ({ children }) => {
         handleUserClick,
         fetchChatMessageList,
         receivedMessageCount,
-        markChatRoomAsRead,
         isLoggedIn,
       }}
     >

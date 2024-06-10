@@ -49,7 +49,7 @@ const Message = () => {
   return (
     <div>
       <div className="message-count">Messages: {messageCount}</div>
-      <MessageList setMessageCount={setMessageCount} />
+      <MessageList />
       <MessageRoom />
     </div>
   );

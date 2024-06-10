@@ -15,11 +15,11 @@ const HomeNav = () => {
   const { openModal, closeModal, isModalOpen } = useModal();
   const { navState, handleNavClick, handleMenuClick, isCollapsed } = useNav();
   const navigate = useNavigate();
-  const { receivedMessageCount, fetchChatMessageList } = useChatRoom();
+  // const { receivedMessageCount, fetchChatMessageList } = useChatRoom();
 
-  useEffect(() => {
-    fetchChatMessageList();
-  }, [fetchChatMessageList]);
+  // useEffect(() => {
+  //   fetchChatMessageList();
+  // }, [fetchChatMessageList]);
 
   return (
     <div className="home-nav-container">
@@ -82,7 +82,7 @@ const HomeNav = () => {
             }
             className={`menu-item ${navState.messages ? 'active' : ''}`}
             onClick={() => handleMenuClick('messages', '/messages', navigate)}
-          >{receivedMessageCount}
+          >
             메시지
           </MenuItem>
           <MenuItem

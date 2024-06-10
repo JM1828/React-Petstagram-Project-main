@@ -6,7 +6,6 @@ import useUser from '../hook/useUser';
 import useChatRoom from '../hook/useChatRoom';
 import useAllUser from '../hook/useAllUser';
 import { useNavigate } from 'react-router-dom';
-import { enterRoom } from '../service/ChatWebSocketService.js';
 
 const Overlay = styled.div`
   position: fixed;
@@ -139,18 +138,15 @@ const MessageList = () => {
   };
 
   const handleChatRoomUserClick = (chatRoomId) => {
-    enterRoom(chatRoomId);
     handleUserClick(chatRoomId);
     navigate(`/messages/${chatRoomId}`);
   };
 
   const handleCreateChatRoom = async () => {
     if (selectedUser) {
-      const chatRoomId = await handleSelectedUser(selectedUser);
-      if (chatRoomId) {
-        navigate(`/messages/${chatRoomId}`);
-        handleClose();
-      }
+      const createdChatRoomId = await handleSelectedUser(selectedUser);
+      navigate(`/messages/${createdChatRoomId}`);
+      handleClose();
     } else {
       console.warn('선택된 사용자가 없습니다.');
     }

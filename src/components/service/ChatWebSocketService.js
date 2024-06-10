@@ -36,14 +36,10 @@ export const connect = (
 
       // 메시지 개수 구독
       stompClient.subscribe(
-        `/sub/messageCount/${userEmail}`,
-        (messageCount) => {
+        `/sub/messageCount/${userEmail}`, (messageCount) => {
           updateMessageCount(JSON.parse(messageCount.body));
         }
       );
-
-      // 방 입장 메시지 전송 (채팅방을 처음 클릭할 때 호출)
-      enterRoom(chatRoomId);
     },
     onDisconnect: (frame) => {
       console.log('Disconnected from WebSocket', frame);
@@ -55,21 +51,6 @@ export const connect = (
   });
 
   stompClient.activate();
-};
-
-// 채팅방 입장 시 호출되는 함수
-export const enterRoom = (chatRoomId) => {
-  if (!stompClient || !stompClient.connected) {
-    console.error('WebSocket not connected');
-    return;
-  }
-
-  stompClient.publish({
-    destination: `/pub/enterRoom/${chatRoomId}`,
-    body: JSON.stringify({}),
-  });
-
-  console.log(`Entered chat room: ${chatRoomId}`);
 };
 
 // 메시지 보내기
