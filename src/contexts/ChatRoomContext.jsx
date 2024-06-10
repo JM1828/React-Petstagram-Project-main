@@ -49,7 +49,10 @@ export const ChatRoomProvider = ({ children }) => {
         })
       );
       setChatMessageList(filteredChatRooms);
-      const totalReceivedMessages = filteredChatRooms.reduce((total, room) => total + room.countReceivedMessages, 0);
+      const totalReceivedMessages = filteredChatRooms.reduce(
+        (total, room) => total + room.countReceivedMessages,
+        0
+      );
       setReceivedMessageCount(totalReceivedMessages);
     } catch (error) {
       console.error('채팅방 리스트를 가져오는 중 오류 발생:', error);
@@ -119,6 +122,21 @@ export const ChatRoomProvider = ({ children }) => {
     [profileInfo.id, allUserProfiles]
   );
 
+  // 채팅방을 클릭하여 메시지를 읽었다는 정보를 서버로 전송하는 함수
+  const markChatRoomAsRead = useCallback(
+    async (chatRoomId) => {
+      try {
+        await ChatRoomService.markChatRoomAsRead(chatRoomId); // 채팅방을 읽었다는 정보 전달
+        // 메시지 개수를 업데이트
+        const newMessageCount = receivedMessageCount - 1; // 읽은 메시지가 하나 줄었으므로 1을 빼줍니다.
+        setReceivedMessageCount(newMessageCount);
+      } catch (error) {
+        console.error('Failed to mark chat room as read:', error);
+      }
+    },
+    [receivedMessageCount, setReceivedMessageCount]
+  );
+
   return (
     <ChatRoomContext.Provider
       value={{
@@ -132,6 +150,8 @@ export const ChatRoomProvider = ({ children }) => {
         handleSelectedUser,
         handleUserClick,
         fetchChatMessageList,
+        receivedMessageCount,
+        markChatRoomAsRead,
         isLoggedIn,
       }}
     >

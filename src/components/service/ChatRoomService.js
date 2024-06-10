@@ -37,6 +37,19 @@ class ChatRoomService {
     return response.data;
   }
 
+  // 메시지를 읽었다는 정보를 전달
+  static async markChatRoomAsRead(chatRoomId) {
+    const token = localStorage.getItem('token');
+    const response = await axios.post(
+      `${this.BASE_URL}/user/chatRooms/${chatRoomId}/readMessage`,
+      {},
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    return response.data;
+  }
+
   // 이미지 파일 업로드 메서드
   static async uploadImage(imageFile) {
     const formData = new FormData();
