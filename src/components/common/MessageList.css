@@ -64,3 +64,9 @@
     color: #666;
     font-size: 14px;
 }
+
+
+/* 준모가 추가한거 */
+.new-message-dot {
+    background-color: blue;
+  }

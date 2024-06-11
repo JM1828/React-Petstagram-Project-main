@@ -152,6 +152,14 @@ const MessageList = () => {
     }
   };
 
+  // 새로운 메시지가 있는지 확인하는 함수
+  const hasNewMessage = (chatRoom) => {
+    const unreadMessagesExist = chatRoom.messages.some(
+      (message) => !message.hasUnreadMessage
+    );
+    return unreadMessagesExist;
+  };
+
   const getSearchUsers = () => {
     if (searchText === '') {
       return [];
@@ -216,10 +224,13 @@ const MessageList = () => {
             );
           }
 
+          // 새로운 메시지가 있는지 확인
+          const hasNew = hasNewMessage(chatRoom);
+
           return (
             <div
               key={chatRoom.id}
-              className="Message_message_item"
+              className={`Message_message_item ${hasNew ? 'new-message' : ''}`}
               onClick={() => handleChatRoomUserClick(chatRoom.id)}
             >
               <div className="Message_post-ellipse" />

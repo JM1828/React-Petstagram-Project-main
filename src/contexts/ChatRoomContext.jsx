@@ -24,7 +24,40 @@ export const ChatRoomProvider = ({ children }) => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [chatMessageList, setChatMessageList] = useState([]);
   const [messages, setMessages] = useState([]);
-  const [receivedMessageCount, setReceivedMessageCount] = useState(0);
+  const [messageCount, setMessageCount] = useState(null);
+
+  const resetChatRoom = () => {
+    setChatRoomId(null);
+    setSelectedUser(null);
+    setMessages([]);
+  };
+
+  // 웹소켓 연결
+  useEffect(() => {
+    const onMessageReceived = (message) => {
+      setMessages((prevMessages) => [...prevMessages, message]);
+    };
+
+    const onChatRoomListUpdate = (chatRoomList) => {
+      setChatMessageList(chatRoomList);
+    };
+
+    const onMessageCountUpdate = (count) => {
+      setMessageCount(count);
+    };
+
+    connect(
+      chatRoomId,
+      profileInfo.email,
+      onMessageReceived,
+      onChatRoomListUpdate,
+      onMessageCountUpdate
+    );
+
+    return () => {
+      disconnect();
+    };
+  }, [chatRoomId, profileInfo.email, setMessages, setChatMessageList]);
 
   // 채팅방 리스트 가져오는 함수
   const fetchChatMessageList = useCallback(async () => {
@@ -49,11 +82,6 @@ export const ChatRoomProvider = ({ children }) => {
         })
       );
       setChatMessageList(filteredChatRooms);
-      const totalReceivedMessages = filteredChatRooms.reduce(
-        (total, room) => total + room.countReceivedMessages,
-        0
-      );
-      setReceivedMessageCount(totalReceivedMessages);
     } catch (error) {
       console.error('채팅방 리스트를 가져오는 중 오류 발생:', error);
     }
@@ -107,22 +135,36 @@ export const ChatRoomProvider = ({ children }) => {
       try {
         const response = await ChatRoomService.chatRoomMessagesWithInfo(
           chatRoomId
-          );
-          setMessages(response.messages.reverse());
-          
-          const isSender = response.senderId === profileInfo.id;
-          const selectedUser = isSender
+        );
+        setMessages(response.messages.reverse());
+        setMessageCount(response.messageCount)
+
+        const isSender = response.senderId === profileInfo.id;
+        const selectedUser = isSender
           ? allUserProfiles.find((user) => user.id === response.receiverId)
           : allUserProfiles.find((user) => user.id === response.senderId);
-          
-          setSelectedUser(selectedUser);
-          setChatRoomId(chatRoomId);
+
+        setSelectedUser(selectedUser);
+        setChatRoomId(chatRoomId);
       } catch (error) {
         console.error('메시지와 채팅방 정보를 가져오는 중 오류 발생:', error);
       }
     },
     [profileInfo.id, allUserProfiles]
   );
+
+  // 모든 채팅방의 메시지 개수 가져오기
+  const totalMessageCount = useCallback(async () => {
+    try {
+      const messageCounts = await ChatRoomService.totalMessageCount();
+      setMessageCount(messageCounts);
+      console.log('총 메시지 개수', messageCounts);
+    } catch (error) {
+      console.error('채팅방 메시지 개수를 가져오는 중 오류 발생:', error);
+    }
+  }, []);
+
+  
 
   return (
     <ChatRoomContext.Provider
@@ -137,7 +179,9 @@ export const ChatRoomProvider = ({ children }) => {
         handleSelectedUser,
         handleUserClick,
         fetchChatMessageList,
-        receivedMessageCount,
+        totalMessageCount,
+        messageCount,
+        resetChatRoom,
         isLoggedIn,
       }}
     >

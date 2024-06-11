@@ -4,40 +4,17 @@ import MessageList from '../common/MessageList';
 import MessageRoom from '../common/MessageRoom';
 import useChatRoom from '../hook/useChatRoom';
 import useUser from '../hook/useUser';
-import { connect, disconnect } from '../service/ChatWebSocketService';
 
 const Message = () => {
-  const { chatRoomId, setMessages, setChatMessageList, fetchChatMessageList } =
-    useChatRoom();
-  const { isLoggedIn, profileInfo } = useUser();
-  const [messageCount, setMessageCount] = useState(0);
+  const { fetchChatMessageList, resetChatRoom } = useChatRoom();
+  const { isLoggedIn } = useUser();
 
-  // 웹소켓 연결
+  // 메시지 컴포넌트가 언마운트시에만 실행
   useEffect(() => {
-    const onMessageReceived = (message) => {
-      setMessages((prevMessages) => [...prevMessages, message]);
-    };
-
-    const onChatRoomListUpdate = (chatRoomList) => {
-      setChatMessageList(chatRoomList);
-    };
-
-    const updateMessageCount = (count) => {
-      setMessageCount(count);
-    };
-
-    connect(
-      chatRoomId,
-      profileInfo.email,
-      onMessageReceived,
-      onChatRoomListUpdate,
-      updateMessageCount
-    );
-
     return () => {
-      disconnect();
+      resetChatRoom();
     };
-  }, [chatRoomId, profileInfo.email, setMessages, setChatMessageList]);
+  }, []);
 
   // 채팅방 리스트 가져오기
   useEffect(() => {
@@ -48,7 +25,6 @@ const Message = () => {
 
   return (
     <div>
-      <div className="message-count">Messages: {messageCount}</div>
       <MessageList />
       <MessageRoom />
     </div>

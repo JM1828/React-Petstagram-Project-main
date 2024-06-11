@@ -9,7 +9,7 @@ export const connect = (
   userEmail,
   onMessageReceived,
   onChatRoomListUpdate,
-  updateMessageCount
+  onMessageCountUpdate
 ) => {
   const token = localStorage.getItem('token');
   const socket = new SockJS(`${socketUrl}?token=${token}`);
@@ -37,7 +37,7 @@ export const connect = (
       // 메시지 개수 구독
       stompClient.subscribe(
         `/sub/messageCount/${userEmail}`, (messageCount) => {
-          updateMessageCount(JSON.parse(messageCount.body));
+          onMessageCountUpdate(JSON.parse(messageCount.body));
         }
       );
     },
