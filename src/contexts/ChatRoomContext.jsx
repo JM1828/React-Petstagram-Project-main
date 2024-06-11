@@ -154,17 +154,15 @@ export const ChatRoomProvider = ({ children }) => {
   );
 
   // 모든 채팅방의 메시지 개수 가져오기
-  const totalMessageCount = useCallback(async () => {
+  const totalMessageCount = useCallback(async (selectedUser) => {
     try {
-      const messageCounts = await ChatRoomService.totalMessageCount();
-      setMessageCount(messageCounts);
-      console.log('총 메시지 개수', messageCounts);
+      const response = await ChatRoomService.totalMessageCount(selectedUser.email);
+      console.log('총 메시지 개수', response);
+      setMessageCount(response);
     } catch (error) {
       console.error('채팅방 메시지 개수를 가져오는 중 오류 발생:', error);
     }
   }, []);
-
-  
 
   return (
     <ChatRoomContext.Provider
