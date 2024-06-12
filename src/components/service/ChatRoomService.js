@@ -29,10 +29,10 @@ class ChatRoomService {
   }
 
   // 채팅방의 메시지 개수 반환
-  static async totalMessageCount(receiverEmail) {
+  static async totalMessageCount(receiverId) {
     const token = localStorage.getItem('token');
     const response = await axios.get(
-      `${this.BASE_URL}/user/chatRooms/totalMessageCount/${receiverEmail}`,
+      `${this.BASE_URL}/user/chatRooms/totalMessageCount/${receiverId}`,
       {
         headers: { Authorization: `Bearer ${token}` },
       }

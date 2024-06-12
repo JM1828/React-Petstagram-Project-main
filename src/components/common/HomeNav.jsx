@@ -15,21 +15,20 @@ const HomeNav = () => {
   const { openModal, closeModal, isModalOpen } = useModal();
   const { navState, handleNavClick, handleMenuClick, isCollapsed } = useNav();
   const navigate = useNavigate();
-  const { messageCount, totalMessageCount, handleUserClick, chatRoomId, selectedUser } =
-    useChatRoom();
+  const { isLoggedIn } = useUser();
+  const { messageCount, fetchMessageCount, messages, chatRoomId } = useChatRoom();
 
   useEffect(() => {
     if (chatRoomId) {
-      totalMessageCount(selectedUser);
-      console.log("gdgd" + selectedUser)
+      fetchMessageCount(messages[0].receiverEmail);
     }
-  }, [totalMessageCount, chatRoomId, selectedUser]);
+  }, [ isLoggedIn, fetchMessageCount, chatRoomId, messages]);
 
-  useEffect(() => {
-    if (chatRoomId) {
-      handleUserClick();
-    }
-  }, [handleUserClick, chatRoomId]);
+  // useEffect(() => {
+  //   if (chatRoomId) {
+  //     handleUserClick();
+  //   }
+  // }, [handleUserClick, chatRoomId]);
 
   return (
     <div className="home-nav-container">

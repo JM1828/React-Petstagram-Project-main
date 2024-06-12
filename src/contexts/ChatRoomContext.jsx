@@ -43,6 +43,7 @@ export const ChatRoomProvider = ({ children }) => {
     };
 
     const onMessageCountUpdate = (count) => {
+      console.log("Received message count update:", count);
       setMessageCount(count);
     };
 
@@ -154,9 +155,9 @@ export const ChatRoomProvider = ({ children }) => {
   );
 
   // 모든 채팅방의 메시지 개수 가져오기
-  const totalMessageCount = useCallback(async (selectedUser) => {
+  const fetchMessageCount = useCallback(async (receiverId) => {
     try {
-      const response = await ChatRoomService.totalMessageCount(selectedUser.email);
+      const response = await ChatRoomService.totalMessageCount(receiverId);
       console.log('총 메시지 개수', response);
       setMessageCount(response);
     } catch (error) {
@@ -177,7 +178,7 @@ export const ChatRoomProvider = ({ children }) => {
         handleSelectedUser,
         handleUserClick,
         fetchChatMessageList,
-        totalMessageCount,
+        fetchMessageCount,
         messageCount,
         resetChatRoom,
         isLoggedIn,
