@@ -7,7 +7,6 @@ let stompClient = null;
 export const connect = (
   chatRoomId,
   userEmail,
-  receiverId,
   onMessageReceived,
   onChatRoomListUpdate,
   onMessageCountUpdate
@@ -37,10 +36,8 @@ export const connect = (
 
       // 메시지 개수 구독
       stompClient.subscribe(
-        `/sub/messageCount/${receiverId}`, (message) => {
-          const messageCount = JSON.parse(message.body);
-          console.log("읽지 않은 메시지 개수: " + messageCount.unreadMessages)
-          onMessageCountUpdate(messageCount.unreadMessages);
+        `/sub/messageCount/${userEmail}`, (messageCount) => {
+          onMessageCountUpdate(JSON.parse(messageCount.body));
         }
       );
     },
