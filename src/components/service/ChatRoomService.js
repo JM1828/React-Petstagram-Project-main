@@ -29,10 +29,22 @@ class ChatRoomService {
   }
 
   // 모든 채팅방의 메시지 개수 반환
-  static async totalMessageCount() {
+  static async sentMessageCount() {
     const token = localStorage.getItem('token');
     const response = await axios.get(
-      `${this.BASE_URL}/user/chatRooms/totalMessageCount`,
+      `${this.BASE_URL}/user/chatRooms/sentMessageCount`,
+      {
+        headers: { Authorization: `Bearer ${token}` },
+      }
+    );
+    return response.data;
+  }
+
+  // 모든 채팅방의 메시지 개수 반환
+  static async receivedMessageCount() {
+    const token = localStorage.getItem('token');
+    const response = await axios.get(
+      `${this.BASE_URL}/user/chatRooms/receivedMessageCount`,
       {
         headers: { Authorization: `Bearer ${token}` },
       }

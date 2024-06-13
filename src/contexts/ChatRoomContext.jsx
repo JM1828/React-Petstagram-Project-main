@@ -25,6 +25,9 @@ export const ChatRoomProvider = ({ children }) => {
   const [chatMessageList, setChatMessageList] = useState([]);
   const [messages, setMessages] = useState([]);
   const [messageCount, setMessageCount] = useState(null);
+  const [sentMessageCount, setSentMessageCount] = useState(null);
+  const [receivedMessageCount, setReceivedMessageCount ] = useState(null);
+
 
   const resetChatRoom = () => {
     setChatRoomId(null);
@@ -32,7 +35,7 @@ export const ChatRoomProvider = ({ children }) => {
     setMessages([]);
   };
 
-  // 웹소켓 연결
+  // 웹소켓 연결 및 해제
   useEffect(() => {
     const onMessageReceived = (message) => {
       setMessages((prevMessages) => [...prevMessages, message]);
@@ -42,8 +45,9 @@ export const ChatRoomProvider = ({ children }) => {
       setChatMessageList(chatRoomList);
     };
 
-    const onMessageCountUpdate = (count) => {
-      setMessageCount(count);
+    const onMessageCountUpdate = ( count ) => {
+      console.log("발신자한테 온거" + count)
+      setMessageCount(count)
     };
 
     connect(
@@ -153,10 +157,10 @@ export const ChatRoomProvider = ({ children }) => {
     [profileInfo.id, allUserProfiles]
   );
 
-  // 모든 채팅방의 메시지 개수 가져오기
-  const totalMessageCount = useCallback(async () => {
+  // 수신자가 받은 메시지의 개수 조회
+  const totalsentMessageCount = useCallback(async () => {
     try {
-      const messageCounts = await ChatRoomService.totalMessageCount();
+      const messageCounts = await ChatRoomService.sentMessageCount();
       setMessageCount(messageCounts);
       console.log('총 메시지 개수', messageCounts);
     } catch (error) {
@@ -164,7 +168,16 @@ export const ChatRoomProvider = ({ children }) => {
     }
   }, []);
 
-  
+  // 수신자가 받은 메시지의 개수 조회
+  const totalreceivedMessageCount = useCallback(async () => {
+    try {
+      const messageCounts = await ChatRoomService.receivedMessageCount();
+      setMessageCount(messageCounts);
+      console.log('총 메시지 개수', messageCounts);
+    } catch (error) {
+      console.error('채팅방 메시지 개수를 가져오는 중 오류 발생:', error);
+    }
+  }, []);
 
   return (
     <ChatRoomContext.Provider
@@ -179,7 +192,10 @@ export const ChatRoomProvider = ({ children }) => {
         handleSelectedUser,
         handleUserClick,
         fetchChatMessageList,
-        totalMessageCount,
+        sentMessageCount,
+        receivedMessageCount,
+        totalsentMessageCount,
+        totalreceivedMessageCount,
         messageCount,
         resetChatRoom,
         isLoggedIn,

@@ -11,24 +11,34 @@ import SelectUpload from '../ui/SelectUpload';
 import icons from '../../assets/ImageList';
 
 const HomeNav = () => {
-  const { profileInfo } = useUser();
+  const { isLoggedIn, profileInfo } = useUser();
   const { openModal, closeModal, isModalOpen } = useModal();
   const { navState, handleNavClick, handleMenuClick, isCollapsed } = useNav();
   const navigate = useNavigate();
-  const { messageCount, totalMessageCount, handleUserClick } = useChatRoom();
-  const { isLoggedIn } = useUser();
+  const {
+    messageCount,
+    handleUserClick,
+    selectedUser,
+    messages,
+  } = useChatRoom();
 
-  useEffect(() => {
-    if (isLoggedIn) {
-      totalMessageCount();
-    }
-  }, [totalMessageCount]);
+  // useEffect(() => {
+  //   if (isLoggedIn && messages[0]?.receiverId) {
+  //     totalsentMessageCount();
+  //   }
+  // }, [totalsentMessageCount, isLoggedIn, messages]);
 
-  useEffect(() => {
-    if (isLoggedIn) {
-      handleUserClick();
-    }
-  }, [handleUserClick]);
+  // useEffect(() => {
+  //   if (isLoggedIn && messages) {
+  //     totalreceivedMessageCount();
+  //   }
+  // }, [totalreceivedMessageCount, isLoggedIn, messages]);
+
+  // useEffect(() => {
+  //   if (isLoggedIn) {
+  //     handleUserClick();
+  //   }
+  // }, [handleUserClick, isLoggedIn]);
 
   return (
     <div className="home-nav-container">

@@ -36,8 +36,9 @@ export const connect = (
 
       // 메시지 개수 구독
       stompClient.subscribe(
-        `/sub/messageCount/${userEmail}`, (messageCount) => {
-          onMessageCountUpdate(JSON.parse(messageCount.body));
+        `/sub/messageCount/${userEmail}`, (message) => {
+          const messageCount = JSON.parse(message.body)
+          onMessageCountUpdate(messageCount);
         }
       );
     },
