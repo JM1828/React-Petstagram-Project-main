@@ -17,12 +17,13 @@ const HomeNav = () => {
   const navigate = useNavigate();
   const { isLoggedIn } = useUser();
   const { messageCount, fetchMessageCount, messages, chatRoomId } = useChatRoom();
+  // fetchMessageCount(messages[0].receiverEmail);
 
-  useEffect(() => {
-    if (chatRoomId) {
-      fetchMessageCount(messages[0].receiverEmail);
-    }
-  }, [ isLoggedIn, fetchMessageCount, chatRoomId, messages]);
+  // useEffect(() => {
+  //   if (chatRoomId) {
+  //     fetchMessageCount();
+  //   }
+  // }, [ isLoggedIn, fetchMessageCount, chatRoomId, messages]);
 
   // useEffect(() => {
   //   if (chatRoomId) {

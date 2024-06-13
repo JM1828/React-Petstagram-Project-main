@@ -50,6 +50,7 @@ export const ChatRoomProvider = ({ children }) => {
     connect(
       chatRoomId,
       profileInfo.email,
+      selectedUser?.id,
       onMessageReceived,
       onChatRoomListUpdate,
       onMessageCountUpdate
@@ -58,7 +59,7 @@ export const ChatRoomProvider = ({ children }) => {
     return () => {
       disconnect();
     };
-  }, [chatRoomId, profileInfo.email, setMessages, setChatMessageList]);
+  }, [chatRoomId, profileInfo.email, setMessages, setChatMessageList, selectedUser?.id]);
 
   // 채팅방 리스트 가져오는 함수
   const fetchChatMessageList = useCallback(async () => {
