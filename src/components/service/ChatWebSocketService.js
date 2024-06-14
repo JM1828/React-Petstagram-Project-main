@@ -9,7 +9,8 @@ export const connect = (
   userEmail,
   onMessageReceived,
   onChatRoomListUpdate,
-  onMessageCountUpdate
+  onMessageCountUpdate,
+  chatRoomMessageCountUpdate
 ) => {
   const token = localStorage.getItem('token');
   const socket = new SockJS(`${socketUrl}?token=${token}`);
@@ -39,8 +40,14 @@ export const connect = (
         `/sub/messageCount/${userEmail}`, (message) => {
           const messageCount = JSON.parse(message.body)
           onMessageCountUpdate(messageCount);
-        }
-      );
+        });
+
+        // 채팅방 메시지 개수 구독
+      stompClient.subscribe(
+        `/sub/messageCount/${chatRoomId}/${userEmail}`, (message) => {
+          const messageCount = JSON.parse(message.body)
+          chatRoomMessageCountUpdate(messageCount);
+        });
     },
     onDisconnect: (frame) => {
       console.log('Disconnected from WebSocket', frame);

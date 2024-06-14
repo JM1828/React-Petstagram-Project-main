@@ -43,7 +43,10 @@ export const ChatRoomProvider = ({ children }) => {
     };
 
     const onMessageCountUpdate = ( count ) => {
-      console.log("발신자한테 온거" + count)
+      setMessageCount(count)
+    };
+
+    const chatRoomMessageCountUpdate = ( count ) => {
       setMessageCount(count)
     };
 
@@ -52,7 +55,8 @@ export const ChatRoomProvider = ({ children }) => {
       profileInfo.email,
       onMessageReceived,
       onChatRoomListUpdate,
-      onMessageCountUpdate
+      onMessageCountUpdate,
+      chatRoomMessageCountUpdate
     );
 
     return () => {
@@ -138,7 +142,6 @@ export const ChatRoomProvider = ({ children }) => {
           chatRoomId
         );
         setMessages(response.messages.reverse());
-        setMessageCount(response.messageCount)
 
         const isSender = response.senderId === profileInfo.id;
         const selectedUser = isSender

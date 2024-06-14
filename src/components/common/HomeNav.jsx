@@ -15,19 +15,13 @@ const HomeNav = () => {
   const { openModal, closeModal, isModalOpen } = useModal();
   const { navState, handleNavClick, handleMenuClick, isCollapsed } = useNav();
   const navigate = useNavigate();
-  const { messageCount, unreadMessageCount } = useChatRoom();
+  const { messageCount, unreadMessageCount, handleUserClick } = useChatRoom();
 
   useEffect(() => {
     if (isLoggedIn) {
       unreadMessageCount();
     }
   }, [unreadMessageCount, isLoggedIn]);
-
-  // useEffect(() => {
-  //   if (isLoggedIn && messages) {
-  //     totalreceivedMessageCount();
-  //   }
-  // }, [totalreceivedMessageCount, isLoggedIn, messages]);
 
   // useEffect(() => {
   //   if (isLoggedIn) {
