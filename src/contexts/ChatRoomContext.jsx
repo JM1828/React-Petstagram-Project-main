@@ -25,9 +25,6 @@ export const ChatRoomProvider = ({ children }) => {
   const [chatMessageList, setChatMessageList] = useState([]);
   const [messages, setMessages] = useState([]);
   const [messageCount, setMessageCount] = useState(null);
-  const [sentMessageCount, setSentMessageCount] = useState(null);
-  const [receivedMessageCount, setReceivedMessageCount ] = useState(null);
-
 
   const resetChatRoom = () => {
     setChatRoomId(null);
@@ -157,21 +154,10 @@ export const ChatRoomProvider = ({ children }) => {
     [profileInfo.id, allUserProfiles]
   );
 
-  // 수신자가 받은 메시지의 개수 조회
-  const totalsentMessageCount = useCallback(async () => {
+  // 사용자가 참여한 모든 채팅방에서의 읽지 않은 메시지 개수를 합산하여 반환
+  const unreadMessageCount = useCallback(async () => {
     try {
-      const messageCounts = await ChatRoomService.sentMessageCount();
-      setMessageCount(messageCounts);
-      console.log('총 메시지 개수', messageCounts);
-    } catch (error) {
-      console.error('채팅방 메시지 개수를 가져오는 중 오류 발생:', error);
-    }
-  }, []);
-
-  // 수신자가 받은 메시지의 개수 조회
-  const totalreceivedMessageCount = useCallback(async () => {
-    try {
-      const messageCounts = await ChatRoomService.receivedMessageCount();
+      const messageCounts = await ChatRoomService.unreadMessageCount();
       setMessageCount(messageCounts);
       console.log('총 메시지 개수', messageCounts);
     } catch (error) {
@@ -192,10 +178,7 @@ export const ChatRoomProvider = ({ children }) => {
         handleSelectedUser,
         handleUserClick,
         fetchChatMessageList,
-        sentMessageCount,
-        receivedMessageCount,
-        totalsentMessageCount,
-        totalreceivedMessageCount,
+        unreadMessageCount,
         messageCount,
         resetChatRoom,
         isLoggedIn,
