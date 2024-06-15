@@ -10,6 +10,10 @@ import useChatRoom from '../hook/useChatRoom';
 import useFollowCounts from '../hook/useFollowCounts';
 
 import FriendFollowModal from '../ui/FriendFollowListModal';
+import useReporting from '../hook/useReporting';
+import icons from '../../assets/ImageList';
+import useModal from '../hook/useModal';
+import MoreModal from '../ui/MoreModal';
 
 const FriendFeed = () => {
   const { profileInfo } = useUser();
@@ -24,14 +28,19 @@ const FriendFeed = () => {
     userFollowingList,
     fetchUserFollowerList,
     fetchUserFollowingList,
+    fetchFollowingList,
   } = useFollow();
 
-  const { postUserList = [], fetchUserPosts } = usePost();
+  const { handleReportBanned, handleUnBanned, fetchBannedUsers, isBanned } =
+    useReporting();
+  const { postUserList, fetchUserPosts } = usePost();
   const [friendProfile, setFriendProfile] = useState(null);
+  const [filteredPostUserList, setFilteredPostUserList] = useState([]);
 
   // 모달 상태 관리
   const [isFollowerModalOpen, setIsFollowerModalOpen] = useState(false);
   const [isFollowingModalOpen, setIsFollowingModalOpen] = useState(false);
+  const { openModal, closeModal, isModalOpen } = useModal();
 
   const getImageUrl = (imageUrl) => {
     return `http://localhost:8088/uploads/${imageUrl}`;
@@ -44,18 +53,19 @@ const FriendFeed = () => {
     }
   }, [userId, allUserProfiles]);
 
-  /* 현재 보고있는 유저 id를 통해 post, follower, following 가져오기 */
   const fetchData = useCallback(async () => {
     if (friendProfile?.id) {
       await fetchUserPosts(friendProfile.id);
       await fetchUserFollowerList(friendProfile.id);
       await fetchUserFollowingList(friendProfile.id);
+      await fetchFollowingList();
     }
   }, [
     friendProfile,
     fetchUserPosts,
     fetchUserFollowerList,
     fetchUserFollowingList,
+    fetchFollowingList,
   ]);
 
   useEffect(() => {
@@ -68,6 +78,17 @@ const FriendFeed = () => {
     useFollowCounts(friendProfile ? friendProfile.id : null);
 
   const isCurrentlyFollowing = isFollowing(friendProfile?.id);
+  const isBannedUser = isBanned(friendProfile?.id);
+
+  useEffect(() => {
+    if (isBannedUser) {
+      setFilteredPostUserList([]);
+    } else {
+      setFilteredPostUserList(
+        postUserList.sort((a, b) => new Date(b.regTime) - new Date(a.regTime))
+      );
+    }
+  }, [isBannedUser, postUserList]);
 
   useEffect(() => {
     fetchFollowCounts();
@@ -80,10 +101,40 @@ const FriendFeed = () => {
   const handleFollowClick = async () => {
     if (isFollowing(friendProfile.id)) {
       await handleUnfollow(friendProfile.id);
+      await fetchUserFollowerList(friendProfile.id);
     } else {
       await handleFollow(friendProfile.id);
+      await fetchUserFollowerList(friendProfile.id);
     }
     fetchFollowCounts();
+  };
+
+  const handleBanClick = async () => {
+    if (isBannedUser) {
+      await handleUnBanned(friendProfile.id);
+    } else {
+      await handleReportBanned(friendProfile.id, '');
+    }
+    fetchBannedUsers();
+    fetchFollowCounts();
+  };
+
+  const getFriendMore = () => {
+    return [
+      {
+        label: isBannedUser ? '차단 해제' : '차단',
+        className: isBannedUser ? 'friend-more-unbanned' : 'friend-more-banned',
+        onClick: async () => {
+          await handleBanClick();
+          closeModal('friend-more');
+        },
+      },
+      {
+        label: '취소',
+        className: 'moreoption-cancel',
+        onClick: () => closeModal('friend-more'),
+      },
+    ];
   };
 
   return (
@@ -96,29 +147,47 @@ const FriendFeed = () => {
           <div className="friendfeed-user-header">
             <h2 className="friendfeed-user-email">{friendProfile.email}</h2>
             <div className="friendfeed-user-actions">
-              {profileInfo.email !== friendProfile.email && (
-                <button
-                  className={`friendfeed-follow-btn ${
-                    isFollowing(friendProfile.id) ? 'following' : ''
-                  }`}
-                  onClick={handleFollowClick}
-                >
-                  {isFollowing(friendProfile.id) ? '팔로잉' : '팔로우'}
-                </button>
-              )}
-              <button className="friendfeed-dm-btn">
-                <Link to={`/messages/${chatRoomId}`}>메시지 보내기</Link>
-              </button>
-              <button className="friendfeed-settings-btn">
-                <span>⚙️</span>
+              {profileInfo.email !== friendProfile.email &&
+                (isBannedUser ? (
+                  <button
+                    className="friendfeed-unban-btn"
+                    onClick={handleBanClick}
+                  >
+                    차단 해제
+                  </button>
+                ) : (
+                  <>
+                    <button
+                      className={`friendfeed-follow-btn ${
+                        isFollowing(friendProfile.id) ? 'following' : ''
+                      }`}
+                      onClick={handleFollowClick}
+                    >
+                      {isFollowing(friendProfile.id) ? '팔로잉' : '팔로우'}
+                    </button>
+                    <button className="friendfeed-dm-btn">
+                      <Link to={`/messages/${chatRoomId}`}>메시지 보내기</Link>
+                    </button>
+                  </>
+                ))}
+              <button
+                className="friendfeed-more-btn"
+                onClick={() => openModal('friend-more')}
+              >
+                <img
+                  src={icons.moreIcon}
+                  alt="더보기"
+                  className="friendfeed-more-img"
+                />
               </button>
             </div>
           </div>
+
           <div className="friendfeed-user-stats">
             <div className="friendfeed-user-stat-post">
               <span className="friendfeed-stat-label">게시물</span>
               <span className="friendfeed-stat-number">
-                {postUserList.length}
+                {filteredPostUserList.length}
               </span>
             </div>
             <div
@@ -146,7 +215,7 @@ const FriendFeed = () => {
       </div>
       <div className="friendfeed-container">
         <div className="friendfeed-grid-container">
-          {postUserList.map((post, index) => (
+          {filteredPostUserList.map((post, index) => (
             <div key={index} className="friendfeed-grid-item">
               {post.imageList.map((image, imgIndex) => (
                 <img
@@ -177,6 +246,13 @@ const FriendFeed = () => {
           followList={userFollowingList}
           onClose={() => setIsFollowingModalOpen(false)}
           title="팔로잉"
+        />
+      )}
+
+      {isModalOpen('friend-more') && (
+        <MoreModal
+          options={getFriendMore()}
+          onClose={() => closeModal('friend-more')}
         />
       )}
     </div>

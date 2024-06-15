@@ -26,11 +26,27 @@ import BasicImage from "./basic-profile.jpeg";
 import shareIcon from "/src/assets/myfeed/myfeed-share.png";
 
 /* Webcam */
-import catEars from "/src/assets/camera/catEars.png";
+import transform from "/src/assets/camera/transform.png";
 import kapibara from "/src/assets/camera/kapibara.png";
+import dogFilter from "/src/assets/camera/dog-filter.png";
+import dogEars from "/src/assets/camera/dog-ears.png";
+import dogNose from "/src/assets/camera/dog-nose.png";
 import chilbok from "/src/assets/camera/chilbok.png";
 import sunglasses from "/src/assets/camera/sunglasses.png";
-import transform from "/src/assets/camera/transform.png";
+
+/* PostViewModal */
+import commentIcon2 from "./postviewmodal/postview-speech-bubble.png";
+import bookMarkIcon2 from "./postviewmodal/postview-mark.png";
+import moreIcon2 from "./postviewmodal/postview-comment-more.png";
+import lineIcon from "./postviewmodal/postview-line.png";
+
+/* PostModal */
+import smileIcon from "./postmodal/smile.png";
+import locationIcon from "./postmodal/location.png";
+import underArrowIcon from "./postmodal/under.png";
+
+/* FindPassword */
+import lockIcon from "./find-password.png";
 
 const icons = {
     // HomeNav
@@ -61,11 +77,27 @@ const icons = {
     shareIcon,
 
     // Webcam
-    catEars,
+    transform,
     kapibara,
+    dogFilter,
+    dogEars,
+    dogNose,
     chilbok,
     sunglasses,
-    transform,
+
+    // PostViewModal
+    commentIcon2,
+    bookMarkIcon2,
+    moreIcon2,
+    lineIcon,
+
+    // PostModal
+    smileIcon,
+    locationIcon,
+    underArrowIcon,
+
+    // FindPassword
+    lockIcon,
 };
 
 export default icons;

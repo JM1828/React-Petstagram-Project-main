@@ -46,17 +46,12 @@ export const ChatRoomProvider = ({ children }) => {
       setMessageCount(count)
     };
 
-    const chatRoomMessageCountUpdate = ( count ) => {
-      setMessageCount(count)
-    };
-
     connect(
       chatRoomId,
       profileInfo.email,
       onMessageReceived,
       onChatRoomListUpdate,
       onMessageCountUpdate,
-      chatRoomMessageCountUpdate
     );
 
     return () => {
@@ -162,7 +157,6 @@ export const ChatRoomProvider = ({ children }) => {
     try {
       const messageCounts = await ChatRoomService.unreadMessageCount();
       setMessageCount(messageCounts);
-      console.log('총 메시지 개수', messageCounts);
     } catch (error) {
       console.error('채팅방 메시지 개수를 가져오는 중 오류 발생:', error);
     }

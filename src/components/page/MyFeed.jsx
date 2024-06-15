@@ -1,20 +1,28 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import './MyFeed.css';
+
 import useUser from '../hook/useUser';
 import useModal from '../hook/useModal';
 import usePost from '../hook/usePost';
 import useFollow from '../hook/useFollow';
 import useFollowCounts from '../hook/useFollowCounts';
 
-import ProfileUpdateModal from './ProfileUpdateModal';
+import ProfileUpdateModal from '../ui/ProfileUpdateModal';
 import FollowListModal from '../ui/FollowListModal';
-import icons from '../../assets/ImageList';
 import SelectUpload from '../ui/SelectUpload';
+import PostViewModal from '../ui/PostViewUI/PostViewModal';
+
+import icons from '../../assets/ImageList';
 
 const MyFeed = () => {
   const { profileInfo } = useUser();
   const { openModal, closeModal, isModalOpen } = useModal();
-  const { postUserList = [], fetchUserPosts, postSuccess } = usePost();
+  const {
+    postUserList = [],
+    deletePost,
+    fetchUserPosts,
+    postSuccess,
+  } = usePost();
   const {
     handleDeleteFollower,
     handleUnfollow,
@@ -27,6 +35,8 @@ const MyFeed = () => {
   const { followersCount, followingsCount, fetchFollowCounts } =
     useFollowCounts(profileInfo.id);
 
+  const [selectedPost, setSelectedPost] = useState(null);
+
   useEffect(() => {
     fetchUserPosts(profileInfo.id);
   }, [profileInfo, fetchUserPosts, postSuccess]);
@@ -38,10 +48,16 @@ const MyFeed = () => {
 
   const handleFollowButtonClick = async (userId, action) => {
     await action(userId);
+    await fetchFollowCounts();
   };
 
   const getImageUrl = (image) =>
     `http://localhost:8088/uploads/${image.imageUrl}`;
+
+  const handlePostView = (post) => {
+    setSelectedPost(post);
+    openModal('postview');
+  };
 
   const images = postUserList.flatMap((post) => post.imageList);
 
@@ -61,7 +77,11 @@ const MyFeed = () => {
         {images.length === 0 ? (
           <EmptyFeed onUploadModalOpen={() => openModal('upload')} />
         ) : (
-          <ImageGrid images={images} getImageUrl={getImageUrl} />
+          <ImageGrid
+            posts={postUserList}
+            getImageUrl={getImageUrl}
+            onImageClick={handlePostView}
+          />
         )}
       </div>
       {isModalOpen('profileUpdate') && (
@@ -94,6 +114,14 @@ const MyFeed = () => {
           buttonLabel="팔로잉"
           fetchFollowCounts={fetchFollowCounts}
           fetchFollowList={fetchFollowingList}
+        />
+      )}
+      {isModalOpen('postview') && selectedPost && (
+        <PostViewModal
+          post={selectedPost}
+          deletePost={deletePost}
+          onClose={() => closeModal('postview')}
+          modalType="myfeed"
         />
       )}
     </div>
@@ -165,14 +193,25 @@ const EmptyFeed = ({ onUploadModalOpen }) => (
   </div>
 );
 
-const ImageGrid = ({ images, getImageUrl }) => (
-  <div className="myfeed-grid-container">
-    {images.map((image, index) => (
-      <div key={index} className="myfeed-grid-item">
-        <img src={getImageUrl(image)} alt={`grid-${index}`} />
-      </div>
-    ))}
-  </div>
-);
+const ImageGrid = ({ getImageUrl, posts, onImageClick }) => {
+  /* 게시글 등록 날짜 최신 순으로 정렬 */
+  const sortedPosts = [...posts].sort(
+    (a, b) => new Date(b.regTime) - new Date(a.regTime)
+  );
+
+  return (
+    <div className="myfeed-grid-container">
+      {sortedPosts.map((post, index) => (
+        <div
+          key={index}
+          className="myfeed-grid-item"
+          onClick={() => onImageClick(post)}
+        >
+          <img src={getImageUrl(post.imageList[0])} alt={`grid-${index}`} />
+        </div>
+      ))}
+    </div>
+  );
+};
 
 export default MyFeed;

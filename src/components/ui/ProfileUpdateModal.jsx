@@ -110,12 +110,11 @@ const ProfileUpdateModal = ({
 
         try {
             const token = localStorage.getItem("token");
-            await UserService.updateUser(profileInfo.id, formData, token);
+            await UserService.editUser(profileInfo.id, formData, token);
             await fetchProfileInfo();
             onClose();
         } catch (error) {
             console.error("Error updating user:", error);
-            alert("프로필 업데이트 중 오류가 발생했습니다. 다시 시도해주세요.");
         }
     };
 
@@ -134,12 +133,7 @@ const ProfileUpdateModal = ({
     };
 
     const handleDeleteImage = () => {
-        setSelectedImage(null);
-        setSelectedFile(null);
-        setShowModal(false);
-        // 기본 프로필 사진으로 변경하고 싶다면 여기서 API를 호출해 서버에서 이미지 제거 로직을 추가하세요.
-        // UserService.deleteProfileImage(profileInfo.id); // 이와 같은 API 호출
-        setIsSubmitDisabled(false);
+        
     };
 
     return (

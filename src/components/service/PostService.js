@@ -2,7 +2,6 @@ import axios from "axios";
 import * as mobilenet from "@tensorflow-models/mobilenet";
 import * as tf from "@tensorflow/tfjs";
 
-
 class PostService {
     static BASE_URL = "/api";
 
@@ -47,11 +46,6 @@ class PostService {
     // 게시글 작성
     static async createPost(formData, token) {
         try {
-            /* 데이터 확인 */
-            for (let pair of formData.entries()) {
-                console.log(pair[0] + ", " + pair[1]);
-            }
-
             const response = await axios.post(
                 `${PostService.BASE_URL}/post/write`,
                 formData,
@@ -86,7 +80,10 @@ class PostService {
             `${PostService.BASE_URL}/post/update/${postId}`,
             postData,
             {
-                headers: { Authorization: `Bearer ${token}` },
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "multipart/form-data",
+                },
             }
         );
         return response.data;
@@ -121,6 +118,18 @@ class PostService {
         const token = localStorage.getItem("token");
         const response = await axios.get(
             `${PostService.BASE_URL}/post/status/${postId}`,
+            {
+                headers: { Authorization: `Bearer ${token}` },
+            }
+        );
+        return response.data;
+    }
+
+    // 게시글 좋아요 누른 사용자 리스트
+    static async getPostLikesList(postId) {
+        const token = localStorage.getItem("token");
+        const response = await axios.get(
+            `${PostService.BASE_URL}/post/likes/${postId}`,
             {
                 headers: { Authorization: `Bearer ${token}` },
             }

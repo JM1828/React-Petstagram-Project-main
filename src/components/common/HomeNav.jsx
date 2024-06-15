@@ -14,20 +14,14 @@ const HomeNav = () => {
   const { isLoggedIn, profileInfo } = useUser();
   const { openModal, closeModal, isModalOpen } = useModal();
   const { navState, handleNavClick, handleMenuClick, isCollapsed } = useNav();
+  const { messageCount, unreadMessageCount } = useChatRoom();
   const navigate = useNavigate();
-  const { messageCount, unreadMessageCount, handleUserClick } = useChatRoom();
 
   useEffect(() => {
     if (isLoggedIn) {
       unreadMessageCount();
     }
   }, [unreadMessageCount, isLoggedIn]);
-
-  // useEffect(() => {
-  //   if (isLoggedIn) {
-  //     handleUserClick();
-  //   }
-  // }, [handleUserClick, isLoggedIn]);
 
   return (
     <div className="home-nav-container">
@@ -91,8 +85,8 @@ const HomeNav = () => {
             className={`menu-item ${navState.messages ? 'active' : ''}`}
             onClick={() => handleMenuClick('messages', '/messages', navigate)}
           >
-            {messageCount}
             메시지
+            {messageCount}
           </MenuItem>
           <MenuItem
             icon={
