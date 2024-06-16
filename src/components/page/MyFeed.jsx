@@ -51,8 +51,13 @@ const MyFeed = () => {
     await fetchFollowCounts();
   };
 
-  const getImageUrl = (image) =>
+  const getImageUrl = (image) => 
     `http://localhost:8088/uploads/${image.imageUrl}`;
+  
+
+  const getVideoUrl = (video) => 
+    `http://localhost:8088/uploads/${video.videoUrl}`;
+  
 
   const handlePostView = (post) => {
     setSelectedPost(post);
@@ -60,12 +65,14 @@ const MyFeed = () => {
   };
 
   const images = postUserList.flatMap((post) => post.imageList);
+  const videos = postUserList.flatMap((post) => post.videoList);
 
   return (
     <div className="myfeed-frame">
       <UserProfile
         profileInfo={profileInfo}
         imagesCount={images.length}
+        videosCount={videos.length}
         followersCount={followersCount}
         followingsCount={followingsCount}
         onProfileModalOpen={() => openModal('profileUpdate')}
@@ -80,7 +87,8 @@ const MyFeed = () => {
           <ImageGrid
             posts={postUserList}
             getImageUrl={getImageUrl}
-            onImageClick={handlePostView}
+            getVideoUrl={getVideoUrl}
+            onMediaClick={handlePostView}
           />
         )}
       </div>
@@ -131,6 +139,7 @@ const MyFeed = () => {
 const UserProfile = ({
   profileInfo,
   imagesCount,
+  videosCount,
   followersCount,
   followingsCount,
   onProfileModalOpen,
@@ -155,7 +164,7 @@ const UserProfile = ({
         </div>
       </div>
       <div className="myfeed-user-stats">
-        <UserStat label="게시물" count={imagesCount} />
+        <UserStat label="게시물" count={imagesCount + videosCount} />
         <UserStat
           label="팔로워"
           count={followersCount}
@@ -193,7 +202,7 @@ const EmptyFeed = ({ onUploadModalOpen }) => (
   </div>
 );
 
-const ImageGrid = ({ getImageUrl, posts, onImageClick }) => {
+const ImageGrid = ({ getImageUrl, getVideoUrl, posts, onMediaClick }) => {
   /* 게시글 등록 날짜 최신 순으로 정렬 */
   const sortedPosts = [...posts].sort(
     (a, b) => new Date(b.regTime) - new Date(a.regTime)
@@ -205,9 +214,25 @@ const ImageGrid = ({ getImageUrl, posts, onImageClick }) => {
         <div
           key={index}
           className="myfeed-grid-item"
-          onClick={() => onImageClick(post)}
+          onClick={() => onMediaClick(post)}
         >
-          <img src={getImageUrl(post.imageList[0])} alt={`grid-${index}`} />
+          {/* 이미지 렌더링 */}
+          {post.imageList &&
+            post.imageList.map((image, imgIndex) => (
+              <img
+                key={imgIndex}
+                src={getImageUrl(image)}
+                alt={`grid-${index}-img-${imgIndex}`}
+              />
+            ))}
+          {/* 동영상 렌더링 */}
+          {post.videoList &&
+            post.videoList.map((video, vidIndex) => (
+              <video key={vidIndex}>
+                <source src={getVideoUrl(video)} type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+            ))}
         </div>
       ))}
     </div>

@@ -1,5 +1,5 @@
 import './Feed.css';
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 import useUser from '../hook/useUser';
@@ -82,6 +82,40 @@ const FeedItem = ({
   const [commentText, setCommentText] = useState('');
   const [isMoreModalOpen, setIsMoreModalOpen] = useState(false);
   const [isBanReportModalOpen, setIsBanReportModalOpen] = useState(false);
+  const videoRefs = useRef([]);
+
+  useEffect(() => {
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.5, // 50% 이상 보여야 작동
+    };
+
+    const observerCallback = (entries) => {
+      entries.forEach((entry) => {
+        const video = entry.target;
+        if (entry.isIntersecting) {
+          video.play();
+        } else {
+          video.pause();
+          video.currentTime = 0; // 처음으로 되돌리기
+        }
+      });
+    };
+
+    const observer = new IntersectionObserver(observerCallback, observerOptions);
+    const videos = videoRefs.current;
+
+    if (videos) {
+        videos.forEach((video) => video && observer.observe(video));
+    }
+
+    return () => {
+      if (videos) {
+        videos.forEach((video) => video && observer.unobserve(video));
+      }
+    };
+  }, []);
 
   const getImageUrl = (image) => {
     return `http://localhost:8088/uploads/${image.imageUrl}`;
@@ -283,6 +317,7 @@ const FeedItem = ({
                 key={index}
                 className="feed-post-photo"
                 controls
+                ref={(el) => (videoRefs.current[index] = el)}
                 src={getVideoUrl(video)}
               >
                 Your browser does not support the video tag.
