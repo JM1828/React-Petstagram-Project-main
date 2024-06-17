@@ -49,7 +49,15 @@ const PageEditModal = ({ onClose, post, allUserProfiles, setCurrentPost }) => {
     if (file) {
       const reader = new FileReader();
       reader.onload = () => {
-        setSelectedImage(reader.result);
+        const fileType = file.type;
+
+        if (fileType.startsWith('image/')) {
+          setSelectedImage(reader.result);
+          setSelectedVideo(null); // 동영상 선택 시 이미지 제거
+        } else if (fileType.startsWith('video/')) {
+          setSelectedVideo(reader.result);
+          setSelectedImage(null); // 이미지 선택 시 동영상 제거
+        }
       };
       reader.readAsDataURL(file);
     }
@@ -116,9 +124,12 @@ const PageEditModal = ({ onClose, post, allUserProfiles, setCurrentPost }) => {
             )}
 
             {selectedVideo && (
-              <div className="pageedit-video-section">
-                <video controls className="pageedit-selected-video">
-                  <source src={selectedVideo} type="video/mp4" />
+              <div className="pageedit-img-section">
+                <video
+                  className="pageedit_selected-image"
+                  src={selectedVideo}
+                  type="video/mp4"
+                >
                   Your browser does not support the video tag.
                 </video>
               </div>
@@ -127,7 +138,7 @@ const PageEditModal = ({ onClose, post, allUserProfiles, setCurrentPost }) => {
             <div
               className="pageedit-file-div"
               style={{
-                display: selectedImage || selectedVideo ? "none" : "block",
+                display: selectedImage || selectedVideo ? 'none' : 'block',
               }}
             >
               <input

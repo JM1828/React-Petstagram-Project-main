@@ -7,7 +7,7 @@ const KakaoShare = ({ post }) => {
 
     useEffect(() => {
         if (Kakao && !Kakao.isInitialized()) {
-            Kakao.init("55bff4ee406987253e7aa1352c8890b2");
+            Kakao.init("f7d46d6f4a339eaddfa46b6726be0841");
         }
     }, []);
 

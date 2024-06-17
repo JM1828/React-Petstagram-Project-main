@@ -15,7 +15,16 @@
     height: 1000px;
 }
 
-.feed-post-photo {
+.feed-post-photo{
+    background-color: #d9d9d9;
+    height: 624px;
+    left: 0;
+    position: absolute;
+    top: 64px;
+    width: 560px;
+}
+
+.feed-post-video{
     background-color: #d9d9d9;
     height: 624px;
     left: 0;

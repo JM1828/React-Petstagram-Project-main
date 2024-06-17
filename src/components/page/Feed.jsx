@@ -297,7 +297,6 @@ const FeedItem = ({
             {isMoreModalOpen && <MoreModal options={getMoreOptions()} />}
           </div>
         </div>
-
         {post.imageList && post.imageList.length > 0 && (
           <div className="feed-post-photos">
             {post.imageList.map((image, index) => (

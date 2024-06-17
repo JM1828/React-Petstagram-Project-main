@@ -51,13 +51,11 @@ const MyFeed = () => {
     await fetchFollowCounts();
   };
 
-  const getImageUrl = (image) => 
+  const getImageUrl = (image) =>
     `http://localhost:8088/uploads/${image.imageUrl}`;
-  
 
-  const getVideoUrl = (video) => 
+  const getVideoUrl = (video) =>
     `http://localhost:8088/uploads/${video.videoUrl}`;
-  
 
   const handlePostView = (post) => {
     setSelectedPost(post);
@@ -81,7 +79,7 @@ const MyFeed = () => {
         onUploadModalOpen={() => openModal('upload')}
       />
       <div className="myfeed-container">
-        {images.length === 0 ? (
+        {images.length === 0 && videos.length === 0 ? (
           <EmptyFeed onUploadModalOpen={() => openModal('upload')} />
         ) : (
           <ImageGrid
@@ -228,8 +226,7 @@ const ImageGrid = ({ getImageUrl, getVideoUrl, posts, onMediaClick }) => {
           {/* 동영상 렌더링 */}
           {post.videoList &&
             post.videoList.map((video, vidIndex) => (
-              <video key={vidIndex}>
-                <source src={getVideoUrl(video)} type="video/mp4" />
+              <video key={vidIndex} src={getVideoUrl(video)}>
                 Your browser does not support the video tag.
               </video>
             ))}
