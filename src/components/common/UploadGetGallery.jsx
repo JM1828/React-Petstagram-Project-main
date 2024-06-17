@@ -35,15 +35,39 @@ const UploadGetGallery = ({ onClose }) => {
   }, []);
 
   const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        setSelectedMedia(reader.result);
-        setMediaType(file.type.startsWith('video') ? 'video' : 'image');
-      };
-      reader.readAsDataURL(file);
-    }
+    const files = Array.from(e.target.files);
+    const promises = files.map((file) => {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          resolve({ src: reader.result, file });
+        };
+        reader.onerror = reject;
+        if (file.type.startsWith('image')) {
+          reader.readAsDataURL(file);
+        } else if (file.type.startsWith('video')) {
+          reader.readAsDataURL(file);
+        }
+      });
+    });
+
+    Promise.all(promises)
+      .then((media) => {
+        const isImage = media.every((m) => m.file.type.startsWith('image'));
+        const isVideo = media.every((m) => m.file.type.startsWith('video'));
+        if (isImage) {
+          setSelectedMedia(media);
+          setMediaType('image');
+        } else if (isVideo) {
+          setSelectedMedia(media);
+          setMediaType('video');
+        } else {
+          console.error('이미지와 비디오를 혼합해서 업로드할 수 없습니다.');
+        }
+      })
+      .catch((error) => {
+        console.error('파일을 읽는 중 오류가 발생했습니다:', error);
+      });
   };
 
   const handleTextChange = (e) => {
@@ -61,7 +85,6 @@ const UploadGetGallery = ({ onClose }) => {
   const handleSubmit = async () => {
     try {
       openModal('loading');
-      const file = fileInputRef.current?.files[0];
       const postData = { postContent: text, location: selectedAddress };
       const formData = new FormData();
       formData.append(
@@ -71,15 +94,17 @@ const UploadGetGallery = ({ onClose }) => {
         })
       );
 
-      if (file) {
+      if (selectedMedia && selectedMedia.length > 0) {
         if (mediaType === 'image') {
-          const breed = await PostService.classifyImage(file);
-          console.log('Predictions: ', breed);
+          for (let media of selectedMedia) {
+            const breed = await PostService.classifyImage(media.file);
+            console.log('Predictions: ', breed);
 
-          formData.append('breed', breed);
-          formData.append('file', file);
+            formData.append('breed', breed);
+            formData.append('file', media.file);
+          }
         } else if (mediaType === 'video') {
-          formData.append('file', file);
+          formData.append('file', selectedMedia[0].file);
         }
       } else {
         console.error('파일이 선택되지 않았습니다.');
@@ -121,15 +146,18 @@ const UploadGetGallery = ({ onClose }) => {
             {selectedMedia ? (
               <div className="post-img-section">
                 {mediaType === 'image' ? (
-                  <img
-                    src={selectedMedia}
-                    alt="Selected"
-                    className="post-selected-image"
-                  />
+                  selectedMedia.map((media, index) => (
+                    <img
+                      key={index}
+                      src={media.src}
+                      alt={`Selected ${index}`}
+                      className="post-selected-image"
+                    />
+                  ))
                 ) : (
                   <video
                     controls
-                    src={selectedMedia}
+                    src={selectedMedia[0].src}
                     className="post-selected-video"
                   />
                 )}
