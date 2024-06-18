@@ -88,8 +88,14 @@ export const sendMessageWithImage = async (
 };
 
 // WebSocket 연결 해제
-export const disconnect = () => {
+export const disconnect = (chatRoomId, userEmail) => {
   if (stompClient && stompClient.connected) {
+    // 사용자가 채팅방을 떠났음을 알리는 메시지 전송
+    stompClient.publish({
+      destination: `/pub/leaveRoom/${chatRoomId}`,
+      body: JSON.stringify({ userEmail }),
+    });
+
     stompClient.deactivate();
     console.log('Disconnected from WebSocket');
   }

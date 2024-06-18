@@ -55,7 +55,7 @@ export const ChatRoomProvider = ({ children }) => {
     );
 
     return () => {
-      disconnect();
+      disconnect(chatRoomId, profileInfo.email);
     };
   }, [chatRoomId, profileInfo.email, setMessages, setChatMessageList]);
 
