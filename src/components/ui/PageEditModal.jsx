@@ -12,7 +12,7 @@ const PageEditModal = ({ onClose, post, allUserProfiles, setCurrentPost }) => {
   const { openModal, closeModal, isModalOpen, toggleModal } = useModal();
 
   const fileInputRef = useRef(null);
-  const [selectedImage, setSelectedImage] = useState(null);
+  const [selectedImages, setSelectedImages] = useState([]);
   const [selectedVideo, setSelectedVideo] = useState(null);
   const [text, setText] = useState('');
   const maxTextLength = 2200;
@@ -24,11 +24,10 @@ const PageEditModal = ({ onClose, post, allUserProfiles, setCurrentPost }) => {
 
   useEffect(() => {
     if (post) {
-      const imageUrl =
-        post.imageList && post.imageList.length > 0
-          ? `http://localhost:8088/uploads/${post.imageList[0].imageUrl}`
-          : null;
-      setSelectedImage(imageUrl);
+      const imageUrls = post.imageList.map(
+        (image) => `http://localhost:8088/uploads/${image.imageUrl}`
+      );
+      setSelectedImages(imageUrls);
 
       const videoUrl =
         post.videoList && post.videoList.length > 0
@@ -45,21 +44,35 @@ const PageEditModal = ({ onClose, post, allUserProfiles, setCurrentPost }) => {
   }, [post]);
 
   const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const fileType = file.type;
+    const files = e.target.files;
+    const newImages = [];
+    let newVideo = null;
 
-        if (fileType.startsWith('image/')) {
-          setSelectedImage(reader.result);
-          setSelectedVideo(null); // 동영상 선택 시 이미지 제거
-        } else if (fileType.startsWith('video/')) {
-          setSelectedVideo(reader.result);
-          setSelectedImage(null); // 이미지 선택 시 동영상 제거
+    for (const file of files) {
+      const fileType = file.type;
+
+      if (fileType.startsWith('image/')) {
+        if (selectedVideo) {
+          alert('이미지를 동영상으로 바꿀 수 없습니다. 이미지를 선택하세요.');
+          return;
         }
-      };
-      reader.readAsDataURL(file);
+        newImages.push(URL.createObjectURL(file));
+      } else if (fileType.startsWith('video/')) {
+        if (selectedImages.length > 0) {
+          alert('동영상을 이미지로 바꿀 수 없습니다. 동영상을 선택하세요.');
+          return;
+        }
+        newVideo = URL.createObjectURL(file);
+      }
+    }
+
+    if (newImages.length > 0) {
+      setSelectedImages((prevImages) => [...prevImages, ...newImages]);
+      setSelectedVideo(null);
+    }
+    if (newVideo) {
+      setSelectedVideo(newVideo);
+      setSelectedImages([]);
     }
   };
 
@@ -113,13 +126,16 @@ const PageEditModal = ({ onClose, post, allUserProfiles, setCurrentPost }) => {
             className="pageedit-image-section"
             onClick={() => fileInputRef.current.click()}
           >
-            {selectedImage && (
+            {selectedImages && (
               <div className="pageedit-img-section">
-                <img
-                  src={selectedImage}
-                  alt="Selected"
-                  className="pageedit_selected-image"
-                />
+                {selectedImages.map((image, index) => (
+                  <img
+                    key={index}
+                    src={image}
+                    alt="Selected"
+                    className="pageedit_selected-image"
+                  />
+                ))}
               </div>
             )}
 
@@ -128,17 +144,15 @@ const PageEditModal = ({ onClose, post, allUserProfiles, setCurrentPost }) => {
                 <video
                   className="pageedit_selected-image"
                   src={selectedVideo}
-                  type="video/mp4"
-                >
-                  Your browser does not support the video tag.
-                </video>
+                  controls
+                />
               </div>
             )}
 
             <div
               className="pageedit-file-div"
               style={{
-                display: selectedImage || selectedVideo ? 'none' : 'block',
+                display: selectedImages || selectedVideo ? 'none' : 'block',
               }}
             >
               <input
@@ -146,6 +160,7 @@ const PageEditModal = ({ onClose, post, allUserProfiles, setCurrentPost }) => {
                 ref={fileInputRef}
                 style={{ display: 'none' }}
                 onChange={handleFileChange}
+                multiple
               />
             </div>
           </div>

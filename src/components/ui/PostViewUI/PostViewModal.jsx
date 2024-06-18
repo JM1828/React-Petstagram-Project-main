@@ -191,15 +191,16 @@ const PostViewModal = ({ post, deletePost, onClose, modalType }) => {
         >
           <div className="postview-content">
             <div className="postview-img-section">
-              {currentPost.imageList && currentPost.imageList[0] && (
+              {currentPost.imageList.map((image, index) => (
                 <img
+                  key={index}
                   src={`http://localhost:8088/uploads/${
-                    currentPost.imageList[0].imageUrl
+                    image.imageUrl
                   }?${new Date().getTime()}`}
-                  alt=""
+                  alt={`image-${index}`}
                   className="postview-image"
                 />
-              )}
+              ))}
               {currentPost.videoList && currentPost.videoList[0] && (
                 <video controls autoPlay className="postview-video">
                   <source
@@ -212,7 +213,6 @@ const PostViewModal = ({ post, deletePost, onClose, modalType }) => {
                 </video>
               )}
             </div>
-
             <div className="postview-details-section">
               <div className="postview-header-section">
                 <img

@@ -69,8 +69,7 @@ const MyFeed = () => {
     <div className="myfeed-frame">
       <UserProfile
         profileInfo={profileInfo}
-        imagesCount={images.length}
-        videosCount={videos.length}
+        postCount={postUserList.length}
         followersCount={followersCount}
         followingsCount={followingsCount}
         onProfileModalOpen={() => openModal('profileUpdate')}
@@ -136,8 +135,7 @@ const MyFeed = () => {
 
 const UserProfile = ({
   profileInfo,
-  imagesCount,
-  videosCount,
+  postCount,
   followersCount,
   followingsCount,
   onProfileModalOpen,
@@ -162,7 +160,7 @@ const UserProfile = ({
         </div>
       </div>
       <div className="myfeed-user-stats">
-        <UserStat label="게시물" count={imagesCount + videosCount} />
+        <UserStat label="게시물" count={postCount} />
         <UserStat
           label="팔로워"
           count={followersCount}
