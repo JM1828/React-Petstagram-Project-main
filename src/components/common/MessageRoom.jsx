@@ -80,18 +80,19 @@ const MessageRoom = () => {
       return;
     }
 
-    let imageUrl = '';
+    let imageUrls = [];
 
     // 이미지가 선택되었거나 파일이 업로드 되었다면, 이미지 업로드 처리
-    if (fileInputRef.current?.files[0] || selectedImage) {
-      let imageToUpload = fileInputRef.current?.files[0];
-      if (!imageToUpload) {
-        // fileInputRef에서 파일을 찾을 수 없으면 selectedImage에서 Blob 생성
-        const blob = await fetch(selectedImage).then((res) => res.blob());
-        imageToUpload = blob;
-      }
-      imageUrl = await ChatRoomService.uploadImage(imageToUpload);
+      if (fileInputRef.current?.files.length || selectedImage) {
+    // fileInputRef에서 여러 파일을 처리
+    const files = fileInputRef.current?.files || [];
+
+    for (let i = 0; i < files.length; i++) {
+      const imageToUpload = files[i];
+      const imageUrl = await ChatRoomService.uploadImage(imageToUpload);
+      imageUrls.push(imageUrl);
     }
+  }
 
     // 메시지, 이미지 또는 둘 다 있는 경우 메시지 전송 처리
     await sendMessageWithImage(
@@ -99,7 +100,7 @@ const MessageRoom = () => {
       profileInfo.id,
       selectedUser.id,
       messageContent,
-      imageUrl
+      imageUrls
     );
 
     // 상태 초기화
@@ -200,6 +201,7 @@ const MessageRoom = () => {
           style={{ display: 'none' }}
           ref={fileInputRef}
           onChange={handleFileChange}
+          multiple
         />
         <button onClick={handleSendMessage}>전송</button>
         <img

@@ -58,7 +58,7 @@ export const sendMessageWithImage = async (
   senderId,
   receiverId,
   messageContent,
-  imageUrl
+  imageUrls
 ) => {
   try {
     if (!stompClient || !stompClient.connected) {
@@ -70,10 +70,10 @@ export const sendMessageWithImage = async (
       senderId,
       receiverId,
       messageContent,
-      imageUrl,
+      imageUrls,
     };
 
-    console.log('imageUrl :', imageUrl);
+    console.log('imageUrl :', imageUrls);
 
     // 메시지와 이미지를 함께 전송
     stompClient.publish({
