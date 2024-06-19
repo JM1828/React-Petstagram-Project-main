@@ -29,7 +29,7 @@ const Message = () => {
     if (chatRoomId) {
       handleUserClick();
     }
-  }, [handleUserClick, isLoggedIn]);
+  }, [chatRoomId, handleUserClick]);
 
   return (
     <div>

@@ -91,6 +91,10 @@ export const sendMessageWithImage = async (
 export const disconnect = (chatRoomId, userEmail) => {
   if (stompClient && stompClient.connected) {
     // 사용자가 채팅방을 떠났음을 알리는 메시지 전송
+    const payload = {
+      chatRoomId,
+      userEmail,
+    };
     stompClient.publish({
       destination: `/pub/leaveRoom/${chatRoomId}`,
       body: JSON.stringify({ userEmail }),
