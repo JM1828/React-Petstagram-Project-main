@@ -17,7 +17,11 @@
         "@stomp/stompjs": "^7.0.0",
         "@tensorflow-models/blazeface": "^0.1.0",
         "@tensorflow-models/mobilenet": "^2.1.1",
-        "@tensorflow/tfjs": "^4.20.0",
+        "@tensorflow/tfjs": "^4.19.0",
+        "@tensorflow/tfjs-backend-webgl": "^4.19.0",
+        "@tensorflow/tfjs-converter": "^4.19.0",
+        "@tensorflow/tfjs-core": "^4.19.0",
+        "@tensorflow/tfjs-node": "^4.19.0",
         "axios": "^1.6.8",
         "cors": "^2.8.5",
         "events": "^3.3.0",
@@ -30,6 +34,7 @@
         "react-dom": "^18.2.0",
         "react-kakao-maps-sdk": "^1.1.27",
         "react-pro-sidebar": "^1.1.0",
+        "react-responsive-carousel": "^3.2.23",
         "react-router-dom": "^6.23.1",
         "react-select": "^5.8.0",
         "react-slick": "^0.30.2",
@@ -40,7 +45,8 @@
         "sockjs-client": "^1.6.1",
         "styled-components": "^6.1.11",
         "sweetalert2": "^11.11.1",
-        "sweetalert2-react-content": "^5.0.7"
+        "sweetalert2-react-content": "^5.0.7",
+        "wavesurfer.js": "^7.7.15"
     },
     "devDependencies": {
         "@types/react": "^18.2.66",

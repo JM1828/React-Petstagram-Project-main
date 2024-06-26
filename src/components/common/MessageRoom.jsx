@@ -1,223 +1,556 @@
-import React, { useState, useRef } from 'react';
-import './MessageRoom.css';
-import { sendMessageWithImage } from '../service/ChatWebSocketService.js';
-import styled from 'styled-components';
-import ChatRoomService from '../service/ChatRoomService';
-import { Link } from 'react-router-dom';
-import useChatRoom from '../hook/useChatRoom';
-import useUser from '../hook/useUser';
+// MessageRoom.jsx
+import React, { useState, useRef, useEffect } from "react";
+import { Link, useLocation } from "react-router-dom";
+import "./MessageRoom.css";
+import {
+    sendMessageWithImage,
+    sendMessageWithAudio,
+} from "../service/ChatWebSocketService.js";
+import ChatRoomService from "../service/ChatRoomService";
+import useChatRoom from "../hook/useChatRoom";
+import useUser from "../hook/useUser";
+import useModal from "../hook/useModal.js";
+import useAudioRecorder from "../hook/useAudioRecorder.js";
 
-// 이모지 선택창 스타일
-const EmojiPickerModal = styled.div`
-  position: relative;
-  top: 30px;
-  right: 0;
-  background: #fff;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-  padding: 10px;
-  z-index: 1000;
-  width: 250px;
-`;
+import CreateChatRoom from "../ui/message/CreateChatRoom.jsx";
+import CustomAudioPlay from "../ui/message/CustomAudioPlay.jsx";
 
-const EmojiButton = styled.button`
-  background: none;
-  border: none;
-  font-size: 24px;
-  cursor: pointer;
-  margin: 5px;
-  display: inline-block;
-`;
-
-const EmojiTitle = styled.div`
-  font-size: 14px;
-  font-weight: bold;
-  margin-bottom: 10px;
-  text-align: center;
-`;
-
-const EmojiList = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-`;
-
-const EmojiPicker = ({ onEmojiClick }) => (
-  <EmojiPickerModal>
-    <EmojiTitle>최고 인기 이모티콘</EmojiTitle>
-    <EmojiList>
-      {['🐥', '🐣', '🐤', '🐧', '🐦', '🐰', '🐹'].map((emoji) => (
-        <EmojiButton key={emoji} onClick={() => onEmojiClick(emoji)}>
-          {emoji}
-        </EmojiButton>
-      ))}
-    </EmojiList>
-  </EmojiPickerModal>
-);
+import icons from "../../assets/ImageList.js";
 
 const MessageRoom = () => {
-  const [messageContent, setMessageContent] = useState('');
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-  const { selectedUser, chatRoomId, messages } = useChatRoom();
-  const { profileInfo } = useUser();
-  const fileInputRef = useRef(null);
+    const { selectedUser, chatRoomId, messages } = useChatRoom();
+    const { profileInfo } = useUser();
+    const { openModal, closeModal, isModalOpen } = useModal();
+    const {
+        isRecording,
+        audioBlob,
+        startRecording,
+        stopRecording,
+        resetRecording,
+    } = useAudioRecorder();
+    const fileInputRef = useRef(null);
+    const messageEndRef = useRef(null);
 
-  const getImageUrl = (image) => {
-    return `http://localhost:8088/uploads/${image.imageUrl}`;
-  };
+    const [messageContent, setMessageContent] = useState("");
+    const [selectedFiles, setSelectedFiles] = useState([]);
+    const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+    const [audioUrl, setAudioUrl] = useState("");
+    const [recordingTime, setRecordingTime] = useState(0);
+    const [isReset, setIsReset] = useState(true);
 
-  // 메시지 입력 핸들러
-  const handleMessageChange = (event) => {
-    setMessageContent(event.target.value);
-  };
+    const location = useLocation();
 
-  // 메시지와 이미지 함께 보내기
-  const handleSendMessage = async () => {
-    if (!messageContent && !fileInputRef.current?.files[0] && !selectedImage) {
-      // 메시지나 이미지가 없으면 아무것도 하지 않음
-      return;
-    }
+    const getImageUrl = (image) => {
+        return `http://localhost:8088/uploads/${image.imageUrl}`;
+    };
 
-    let imageUrls = [];
+    const getVideoUrl = (video) => {
+        return `http://localhost:8088/uploads/${video.videoUrl}`;
+    };
 
-    // 이미지가 선택되었거나 파일이 업로드 되었다면, 이미지 업로드 처리
-      if (fileInputRef.current?.files.length || selectedImage) {
-    // fileInputRef에서 여러 파일을 처리
-    const files = fileInputRef.current?.files || [];
+    const handleMessageChange = (e) => {
+        setMessageContent(e.target.value);
+    };
 
-    for (let i = 0; i < files.length; i++) {
-      const imageToUpload = files[i];
-      const imageUrl = await ChatRoomService.uploadImage(imageToUpload);
-      imageUrls.push(imageUrl);
-    }
-  }
+    const handleSendMessage = async () => {
+        if (!messageContent && selectedFiles.length === 0) {
+            return;
+        }
 
-    // 메시지, 이미지 또는 둘 다 있는 경우 메시지 전송 처리
-    await sendMessageWithImage(
-      chatRoomId,
-      profileInfo.id,
-      selectedUser.id,
-      messageContent,
-      imageUrls
-    );
+        let imageUrls = [];
+        let videoUrls = [];
 
-    // 상태 초기화
-    setMessageContent('');
-    setSelectedImage(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
-  };
+        for (let file of selectedFiles) {
+            const fileToUpload = file.file;
+            if (file.type.startsWith("image/")) {
+                const imageUrl = await ChatRoomService.uploadImage(fileToUpload);
+                imageUrls.push(imageUrl);
+            } else if (file.type.startsWith("video/")) {
+                const videoUrl = await ChatRoomService.uploadVideo(fileToUpload);
+                console.log("제발 나와라", videoUrl);
+                videoUrls.push(videoUrl);
+            }
+        }
 
-  // 이미지 선택 핸들러
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        setSelectedImage(reader.result);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
+        await sendMessageWithImage(
+            chatRoomId,
+            profileInfo.id,
+            selectedUser.id,
+            messageContent,
+            imageUrls,
+            videoUrls
+        );
 
-  // 엔터키로 메시지 보내기
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter') {
-      handleSendMessage();
-    }
-  };
+        setMessageContent("");
+        setSelectedFiles([]);
+        if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+        }
+        scrollToBottom();
+    };
 
-  // 이모티콘과 같이 메시지 보내기
-  const handleEmojiClick = (emoji) => {
-    setMessageContent(messageContent + emoji);
-    setShowEmojiPicker(false);
-  };
+    const handleSendAudioMessage = async () => {
+        if (!audioBlob) {
+            return;
+        }
 
-  return (
-    <div className="messageroom">
-      <div className="user_container">
-        <img className="profile_image1" src={selectedUser?.profileImageUrl} />
-        <div className="user_name_one">{selectedUser?.name}</div>
-        <img
-          className="profile_detail"
-          src="../src/assets/message/material-symbols_info-outline.png"
-          alt="Info Icon"
-        />
-      </div>
+        const formData = new FormData();
+        formData.append("file", audioBlob, "audioMessage.mp3");
 
-      <div className="user_info">
-        <img className="profile_image2" src={selectedUser?.profileImageUrl} />
-        <div className="user_name_two">{selectedUser?.name}</div>
-        <div className="user_status">{selectedUser?.email} • petstagram</div>
-        <button className="profile_btn">
-          <Link to={`/friendfeed/${selectedUser?.id}`}>프로필 보기</Link>
-        </button>
-      </div>
+        try {
+            const response = await fetch("/api/user/uploadAudio", {
+                method: "POST",
+                body: formData,
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+            });
+            const data = await response.json();
+            const audioUrl = data.audioUrl;
 
-      <div className="text_section">
-        {messages
-          .filter((message) => message.chatRoomId === chatRoomId)
-          .map((message, index) => (
-            <div className="text" key={index}>
-              {message.imageList &&
-                message.imageList.map((image, idx) => (
-                  <img
-                    key={idx}
-                    src={getImageUrl(image)}
-                    alt={`Message ${idx + 1}`}
-                  />
-                ))}
-              {message.messageContent}
+            await sendMessageWithAudio(
+                chatRoomId,
+                profileInfo.id,
+                selectedUser.id,
+                audioUrl
+            );
+
+            // Stop recording and reset states
+            stopRecording();
+            setAudioUrl("");
+            setRecordingTime(0);
+            setIsReset(true);
+            setMessageContent("");
+            setSelectedFiles([]);
+            if (fileInputRef.current) {
+                fileInputRef.current.value = "";
+            }
+
+            scrollToBottom();
+        } catch (error) {
+            console.error("Failed to upload audio file:", error);
+        }
+    };
+
+    useEffect(() => {
+        if (audioBlob) {
+            const url = URL.createObjectURL(audioBlob);
+            setAudioUrl(url);
+        }
+    }, [audioBlob]);
+
+    useEffect(() => {
+        let interval;
+        if (isRecording) {
+            interval = setInterval(() => {
+                setRecordingTime((prevTime) => {
+                    if (prevTime >= 59) {
+                        stopRecording();
+                        clearInterval(interval);
+                        return 60;
+                    }
+                    return prevTime + 1;
+                });
+            }, 1000);
+        } else {
+            clearInterval(interval);
+        }
+        return () => clearInterval(interval);
+    }, [isRecording, stopRecording]);
+
+    const handleFileChange = (e) => {
+        const files = Array.from(e.target.files);
+        const fileObjects = files.map((file) => ({
+            file,
+            url: URL.createObjectURL(file),
+            type: file.type,
+        }));
+        setSelectedFiles((prevFiles) => [...prevFiles, ...fileObjects]);
+    };
+
+    const handleRemoveFile = (index) => {
+        setSelectedFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
+    };
+
+    const handleEnterSubmit = (e) => {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            e.stopPropagation();
+            handleSendMessage();
+        }
+    };
+
+    const handleEmojiClick = (emoji) => {
+        setMessageContent(messageContent + emoji);
+        setShowEmojiPicker(false);
+    };
+
+    const scrollToBottom = () => {
+        if (messageEndRef.current) {
+            messageEndRef.current.scrollIntoView({ behavior: "smooth" });
+        }
+    };
+
+    const handleCancelRecording = () => {
+        stopRecording();
+        setAudioUrl("");
+        setRecordingTime(0);
+        setShowEmojiPicker(false);
+        setIsReset(true);
+    };
+
+    useEffect(() => {
+        scrollToBottom();
+    }, [messages, chatRoomId]);
+
+    useEffect(() => {
+        setTimeout(scrollToBottom, 100);
+    }, [location]);
+
+    useEffect(() => {
+        setMessageContent("");
+        setSelectedFiles([]);
+        setAudioUrl("");
+        if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+        }
+        setRecordingTime(0);
+        stopRecording();
+        setIsReset(true);
+    }, [chatRoomId]);
+
+    if (!selectedUser) {
+        return (
+            <div className="messageroom-no-message-container">
+                <div className="messageroom-no-message-wrapper">
+                    <img
+                        src=""
+                        alt="추후 삽입"
+                        className="messageroom-no-message-icon"
+                    />
+                    <h2>내 메시지</h2>
+                    <p>친구나 그룹에 비공개 사진과 메시지를 보내세요</p>
+                    <button
+                        className="messageroom-no-message-btn"
+                        onClick={() => openModal("create-chatroom")}
+                    >
+                        메시지 보내기
+                    </button>
+                </div>
             </div>
-          ))}
-        {selectedImage && (
-          <img
-            className="selected-image-preview"
-            src={selectedImage}
-            alt="Selected Image Preview"
-          />
-        )}
-      </div>
-      <div className="input_section">
-        <img
-          className="smile_icon"
-          src="../src/assets/message/smile.png"
-          alt="smile icon"
-          onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-        />
-        {showEmojiPicker && <EmojiPicker onEmojiClick={handleEmojiClick} />}
-        <input
-          className="input_message"
-          placeholder="메시지 입력 .."
-          value={messageContent}
-          onChange={handleMessageChange}
-          onKeyDown={handleKeyDown}
-        />
-        <input
-          type="file"
-          style={{ display: 'none' }}
-          ref={fileInputRef}
-          onChange={handleFileChange}
-          multiple
-        />
-        <button onClick={handleSendMessage}>전송</button>
-        <img
-          className="mic_icon"
-          src="../src/assets/message/bi_mic.png"
-          alt="mic icon"
-        />
-        <img
-          className="image_icon"
-          src="../src/assets/message/mynaui_image.png"
-          alt="image icon"
-          onClick={() => fileInputRef.current.click()}
-        />
-      </div>
-    </div>
-  );
+        );
+    }
+
+    const formatTime = (seconds) => {
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${String(mins).padStart(2, "0")}:${String(secs).padStart(
+            2,
+            "0"
+        )}`;
+    };
+
+    return (
+        <div className="messageroom-container">
+            <div className="messageroom-user-container">
+                <img
+                    className="messageroom-profile-image"
+                    src={selectedUser?.profileImageUrl}
+                />
+                <div className="messageroom-user-name-one">
+                    {selectedUser?.name}
+                </div>
+                <img
+                    className="messageroom-profile-info"
+                    src={icons.messageInfoIcon}
+                    alt="Info Icon"
+                />
+            </div>
+
+            <div
+                className={`messageroom-scroll-section ${selectedFiles.length > 0 ? "image-selected" : ""
+                    }`}
+            >
+                <div className="messageroom-user-info">
+                    <img
+                        className="messageroom-user-info-profile-image"
+                        src={selectedUser?.profileImageUrl}
+                    />
+                    <div className="messageroom-user-info-name">
+                        {selectedUser?.name}
+                    </div>
+                    <div className="messageroom-user-info-status">
+                        {selectedUser?.email} • petstagram
+                    </div>
+                    <button className="messageroom-profile-btn">
+                        <Link to={`/friendfeed/${selectedUser?.email}`}>
+                            프로필 보기
+                        </Link>
+                    </button>
+                </div>
+
+                <div className="messageroom-dm-section">
+                    {messages
+                        .filter((message) => message.chatRoomId === chatRoomId)
+                        .map((message, index, array) => {
+                            const isLastConsecutiveMessage =
+                                index === array.length - 1 ||
+                                array[index + 1].senderId !== message.senderId;
+
+                            return (
+                                <div
+                                    key={index}
+                                    className={`messageroom-dm-container ${message.senderId === profileInfo.id
+                                        ? "sent"
+                                        : "received"
+                                        }`}
+                                >
+                                    {message.senderId !== profileInfo.id &&
+                                        isLastConsecutiveMessage && (
+                                            <img
+                                                className="messageroom-dm-profile-image"
+                                                src={
+                                                    selectedUser?.profileImageUrl
+                                                }
+                                                alt="Profile"
+                                            />
+                                        )}
+                                    <div
+                                        className={`messageroom-dm ${message.senderId === profileInfo.id
+                                            ? "sent"
+                                            : "received"
+                                            }`}
+                                        style={{
+                                            marginLeft:
+                                                message.senderId !==
+                                                    profileInfo.id &&
+                                                    !isLastConsecutiveMessage
+                                                    ? "50px"
+                                                    : "0",
+                                        }}
+                                    >
+                                        <div className="messageroom-dm-content-wrapper">
+                                            {message.imageList &&
+                                                message.imageList.map(
+                                                    (image, idx) => (
+                                                        <img
+                                                            key={idx}
+                                                            src={getImageUrl(
+                                                                image
+                                                            )}
+                                                            alt={`Message ${idx + 1
+                                                                }`}
+                                                            className="messageroom-dm-image"
+                                                        />
+                                                    )
+                                                )}
+                                            {message.videoList &&
+                                                message.videoList.map(
+                                                    (video, idx) => (
+                                                        <video
+                                                            key={idx}
+                                                            src={getVideoUrl(
+                                                                video
+                                                            )}
+                                                            controls
+                                                            className="messageroom-dm-image"
+                                                        />
+                                                    )
+                                                )}
+                                            <div className="messageroom-dm-content">
+                                                {message.messageContent}
+                                            </div>
+                                            {message.audioUrl && (
+                                                <audio
+                                                    controls
+                                                    className="messageroom-dm-audio"
+                                                >
+                                                    <source
+                                                        src={`http://localhost:8088/uploads/${message.audioUrl}`}
+                                                        type="audio/webm"
+                                                    />
+                                                </audio>
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    <div ref={messageEndRef} />
+                </div>
+            </div>
+
+            <div className="messageroom-input-section">
+                {selectedFiles.length > 0 && (
+                    <div className="messageroom-selected-image-container">
+                        {selectedFiles.map((file, index) => (
+                            <div
+                                key={index}
+                                className="messageroom-selected-image-wrapper"
+                            >
+                                {file.type.startsWith("image/") ? (
+                                    <img
+                                        className="messageroom-selected-image-preview"
+                                        src={file.url}
+                                        alt={`Selected ${index}`}
+                                    />
+                                ) : (
+                                    <video
+                                        className="messageroom-selected-image-preview"
+                                        src={file.url}
+                                        controls
+                                    />
+                                )}
+                                <button
+                                    className="messageroom-remove-image-btn"
+                                    onClick={() => handleRemoveFile(index)}
+                                >
+                                    x
+                                </button>
+                            </div>
+                        ))}
+                        <div
+                            className="messageroom-selected-image_icon-wrapper"
+                            onClick={() => fileInputRef.current.click()}
+                        >
+                            <img
+                                className="messageroom-selected-image_icon"
+                                src={icons.messageImageInputIcon}
+                                alt="image icon"
+                            />
+                        </div>
+                    </div>
+                )}
+                <div className="messagerooom-input-wrapper">
+                    {isRecording ? (
+                        <>
+                            <img
+                                className="messageroom-close_icon"
+                                src={icons.messageAudioClose}
+                                alt="close icon"
+                                onClick={handleCancelRecording}
+                            />
+                            <div className="audio-recording">
+                                <div className="audio-recording-bar">
+                                    <button
+                                        className="audio-recording-stop-button"
+                                        onClick={() => {
+                                            stopRecording();
+                                            setIsReset(false);
+                                        }}
+                                    >
+                                        <img
+                                            src={icons.messagePauseIcon}
+                                            alt="Pause"
+                                            className="audio-recoring-stop-button-img"
+                                        />
+                                    </button>
+                                    <div
+                                        className="audio-recording-bar-fill"
+                                        style={{
+                                            width: `${(recordingTime / 60) * 100
+                                                }%`,
+                                        }}
+                                    ></div>
+                                    <div className="audio-recording-time">
+                                        {formatTime(recordingTime)}
+                                    </div>
+                                </div>
+                            </div>
+                        </>
+                    ) : (
+                        <>
+                            {isReset ? (
+                                <>
+                                    <img
+                                        className="messageroom-smile_icon"
+                                        src={icons.messageSmileIcon}
+                                        alt="smile icon"
+                                        onClick={() =>
+                                            setShowEmojiPicker(!showEmojiPicker)
+                                        }
+                                    />
+                                    <input
+                                        className="messagerooom-input-message"
+                                        placeholder="메시지 입력 .."
+                                        value={messageContent}
+                                        onChange={handleMessageChange}
+                                        onKeyUp={handleEnterSubmit}
+                                    />
+                                    {selectedFiles.length > 0 ||
+                                        messageContent ? (
+                                        <button
+                                            className="messageroom-send-dm"
+                                            onClick={handleSendMessage}
+                                        >
+                                            보내기
+                                        </button>
+                                    ) : (
+                                        <>
+                                            <img
+                                                className="messageroom-mic_icon"
+                                                src={icons.messageMicIcon}
+                                                alt="mic icon"
+                                                onClick={() => {
+                                                    startRecording();
+                                                    setIsReset(false);
+                                                }}
+                                            />
+                                            <img
+                                                className="messageroom-image_icon"
+                                                src={
+                                                    icons.messageImageInputIcon2
+                                                }
+                                                alt="image icon"
+                                                onClick={() =>
+                                                    fileInputRef.current.click()
+                                                }
+                                            />
+                                        </>
+                                    )}
+                                </>
+                            ) : (
+                                <>
+                                    {audioUrl && (
+                                        <div className="audio-preview">
+                                            <img
+                                                className="messageroom-close_icon"
+                                                src={icons.messageAudioClose}
+                                                alt="close icon"
+                                                onClick={handleCancelRecording}
+                                            />
+                                            <CustomAudioPlay
+                                                src={audioUrl}
+                                                duration={recordingTime}
+                                            />
+                                        </div>
+                                    )}
+
+                                    <button
+                                        className="messageroom-send-dm"
+                                        onClick={handleSendAudioMessage}
+                                    >
+                                        보내기
+                                    </button>
+                                </>
+                            )}
+                        </>
+                    )}
+                    <input
+                        type="file"
+                        style={{ display: "none" }}
+                        ref={fileInputRef}
+                        onChange={handleFileChange}
+                        multiple
+                    />
+                </div>
+            </div>
+
+            {isModalOpen("create-chatroom") && (
+                <CreateChatRoom onClose={() => closeModal("create-chatroom")} />
+            )}
+        </div>
+    );
 };
 
 export default MessageRoom;
