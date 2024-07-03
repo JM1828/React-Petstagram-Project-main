@@ -163,14 +163,13 @@ const MessageRoom = () => {
         const fileObjects = files.map((file) => ({
             file,
             url: URL.createObjectURL(file),
+            type: file.type,
         }));
-        setSelectedFiles((prevImages) => [...prevImages, ...fileObjects]);
+        setSelectedFiles((prevFiles) => [...prevFiles, ...fileObjects]);
     };
 
     const handleRemoveFile = (index) => {
-        setSelectedFiles((prevImages) =>
-            prevImages.filter((_, i) => i !== index)
-        );
+        setSelectedFiles((prevFiles) => prevFiles.filter((_, i) => i !== index));
     };
 
     const handleEnterSubmit = (e) => {

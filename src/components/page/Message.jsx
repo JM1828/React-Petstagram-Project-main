@@ -8,8 +8,7 @@ import useChatRoom from "../hook/useChatRoom";
 import useUser from "../hook/useUser";
 
 const Message = () => {
-    const { fetchChatMessageList, resetChatRoom, handleUserClick } =
-        useChatRoom();
+    const { fetchChatMessageList, resetChatRoom } = useChatRoom();
     const { isLoggedIn } = useUser();
 
     // 메시지 컴포넌트가 언마운트시에만 실행

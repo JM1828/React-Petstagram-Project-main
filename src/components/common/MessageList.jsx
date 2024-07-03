@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import "./MessageList.css";
 import { useNavigate } from "react-router-dom";
 
@@ -45,15 +45,15 @@ const MessageList = () => {
                     const lastMessage =
                         chatRoom.messages.length > 0
                             ? chatRoom.messages[0].imageList &&
-                              chatRoom.messages[0].imageList.length > 0
+                                chatRoom.messages[0].imageList.length > 0
                                 ? chatRoom.messages[0].senderId ===
-                                  profileInfo.id
+                                    profileInfo.id
                                     ? "나: 사진을 보냈습니다."
                                     : "사진을 보냈습니다."
                                 : chatRoom.messages[0].senderId ===
-                                  profileInfo.id
-                                ? `나: ${chatRoom.messages[0].messageContent}`
-                                : chatRoom.messages[0].messageContent
+                                    profileInfo.id
+                                    ? `나: ${chatRoom.messages[0].messageContent}`
+                                    : chatRoom.messages[0].messageContent
                             : "메시지가 없습니다.";
 
                     const lastMessageTime =
@@ -79,9 +79,8 @@ const MessageList = () => {
                     return (
                         <div
                             key={chatRoom.id}
-                            className={`Message_message_item ${
-                                chatRoom.unreadMessageCount > 0 ? "new-message" : "read-message"
-                            }`}
+                            className={`Message_message_item ${chatRoom.unreadMessageCount > 0 ? "new-message" : "read-message"
+                                }`}
                             onClick={() => handleChatRoomUserClick(chatRoom.id)}
                         >
                             <img

@@ -9,7 +9,7 @@ export const connect = (
     userEmail,
     onMessageReceived,
     onChatRoomListUpdate,
-    onMessageCountUpdate
+    onMessageCountUpdate,
 ) => {
     const token = localStorage.getItem("token");
     const socket = new SockJS(`${socketUrl}?token=${token}`);
@@ -20,6 +20,8 @@ export const connect = (
             // console.log(str);
         },
         onConnect: () => {
+            // console.log("Connected to WebSocket");
+
             // 채팅방 구독 설정
             stompClient.subscribe(`/sub/chat/room/${chatRoomId}`, (message) => {
                 const chatMessage = JSON.parse(message.body);
@@ -62,7 +64,8 @@ export const sendMessageWithImage = async (
     senderId,
     receiverId,
     messageContent,
-    imageUrls
+    imageUrls,
+    videoUrls
 ) => {
     try {
         if (!stompClient || !stompClient.connected) {
@@ -75,6 +78,7 @@ export const sendMessageWithImage = async (
             receiverId,
             messageContent,
             imageUrls,
+            videoUrls,
         };
 
         // 메시지와 이미지를 함께 전송
@@ -82,7 +86,6 @@ export const sendMessageWithImage = async (
             destination: `/pub/sendMessage/${chatRoomId}`,
             body: JSON.stringify(payload),
         });
-
     } catch (error) {
         console.error("Failed to send message:", error.message);
     }
@@ -107,7 +110,6 @@ export const sendMessageWithAudio = async (
             audioUrl,
         };
 
-
         // 음성 메시지를 전송
         stompClient.publish({
             destination: `/pub/sendAudioMessage/${chatRoomId}`,
@@ -122,16 +124,12 @@ export const sendMessageWithAudio = async (
 // WebSocket 연결 해제
 export const disconnect = (chatRoomId, userEmail) => {
     if (stompClient && stompClient.connected) {
-        // 사용자가 채팅방을 떠났음을 알리는 메시지 전송
-        const payload = {
-            chatRoomId,
-            userEmail,
-        };
         stompClient.publish({
             destination: `/pub/leaveRoom/${chatRoomId}`,
             body: JSON.stringify({ userEmail }),
         });
 
         stompClient.deactivate();
+        // console.log("Disconnected from WebSocket");
     }
 };
