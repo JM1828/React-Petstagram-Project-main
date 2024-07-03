@@ -1,14 +1,15 @@
 import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import "./LoginForm.css";
 import facebook_logo from "/src/assets/facebook.png";
+import kakao from "/src/assets/kakao.png";
 import UserService from "../service/UserService";
+import { KAKAO_AUTH_URL } from "../service/OAuth";
 
 const LoginForm = ({ setIsLoggedIn }) => {
     const [email, setUserEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
-    const navigate = useNavigate();
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -70,6 +71,10 @@ const LoginForm = ({ setIsLoggedIn }) => {
                     <div className="facebook-login">
                         <img src={facebook_logo} alt="Facebook 로고" />
                         <a href="#">Facebook으로 로그인</a>
+                    </div>
+                    <div className="facebook-login">
+                        <img src={facebook_logo} alt="Facebook 로고" />
+                        <a href={KAKAO_AUTH_URL}>kakako로 로그인</a>
                     </div>
 
                     <div className="forgot-password">

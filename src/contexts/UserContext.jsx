@@ -20,6 +20,7 @@ export const UserProvider = ({ children }) => {
         try {
             const token = localStorage.getItem("token");
             const response = await UserService.getMyProfile(token);
+            console.log("카카오 프사",response.profileImage)
             const profileWithImageUrl = {
                 ...response,
                 profileImageUrl: getProfileImageUrl(response.profileImage),

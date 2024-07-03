@@ -51,7 +51,7 @@ export const ChatRoomProvider = ({ children }) => {
             profileInfo.email,
             onMessageReceived,
             onChatRoomListUpdate,
-            onMessageCountUpdate,
+            onMessageCountUpdate
         );
 
         return () => {
@@ -146,11 +146,11 @@ export const ChatRoomProvider = ({ children }) => {
                 const isSender = response.senderId === profileInfo.id;
                 const selectedUser = isSender
                     ? allUserProfiles.find(
-                        (user) => user.id === response.receiverId
-                    )
+                          (user) => user.id === response.receiverId
+                      )
                     : allUserProfiles.find(
-                        (user) => user.id === response.senderId
-                    );
+                          (user) => user.id === response.senderId
+                      );
 
                 setSelectedUser(selectedUser);
                 setChatRoomId(chatRoomId);
@@ -167,8 +167,8 @@ export const ChatRoomProvider = ({ children }) => {
     // 사용자가 참여한 모든 채팅방에서의 읽지 않은 메시지 개수를 합산하여 반환
     const unreadMessageCount = useCallback(async () => {
         try {
-            const messageCount = await ChatRoomService.unreadMessageCount();
-            setMessageCount(messageCount);
+            const messageCounts = await ChatRoomService.unreadMessageCount();
+            setMessageCount(messageCounts);
         } catch (error) {
             console.error("채팅방 메시지 개수를 가져오는 중 오류 발생:", error);
         }

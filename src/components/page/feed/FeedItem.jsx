@@ -1,70 +1,19 @@
-import "./Feed.css";
-import { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import Slider from "react-slick";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 
-import useUser from "../hook/useUser";
-import useAllUser from "../hook/useAllUser";
-import usePost from "../hook/usePost";
-import useLikeStatus from "../hook/useLikeStatus";
-import useFollow from "../hook/useFollow";
-import useComment from "../hook/useComment";
-import useModal from "../hook/useModal";
+import useAllUser from "../../hook/useAllUser";
+import useLikeStatus from "../../hook/useLikeStatus";
+import useFollow from "../../hook/useFollow";
+import useModal from "../../hook/useModal";
 
-import PostViewModal from "../ui/PostViewUI/PostViewModal";
-import MoreModal from "../ui/MoreModal";
-import BanReportModal from "../ui/BanReportModal";
-import KakaoShare from "../ui/kakaoshare/KakaoShare";
-
-import icons from "../../assets/ImageList";
-import GetRelativeTime from "../../utils/GetRelativeTime";
-
-const Feed = () => {
-    const { profileInfo } = useUser();
-    const { postList = [], deletePost } = usePost();
-    const { commentList, submitComment } = useComment();
-    const { openModal, closeModal, isModalOpen } = useModal();
-
-    const [selectedPost, setSelectedPost] = useState(postList);
-    const [modalType, setModalType] = useState("feed");
-
-    const handlePostViewClick = (post) => {
-        setSelectedPost(post);
-        setModalType(profileInfo.email === post.email ? "myfeed" : "feed");
-        openModal("postview");
-    };
-
-    return (
-        <div>
-            {postList.map((post) => {
-                const postComments =
-                    commentList.find((c) => c.postId === post?.id)?.comments ||
-                    [];
-                return (
-                    post &&
-                    post.id && (
-                        <FeedItem
-                            key={post.id}
-                            post={post}
-                            comments={postComments}
-                            submitComment={submitComment}
-                            handlePostViewClick={handlePostViewClick}
-                            deletePost={deletePost}
-                            profileInfo={profileInfo}
-                        />
-                    )
-                );
-            })}
-            {isModalOpen("postview") && selectedPost && (
-                <PostViewModal
-                    post={selectedPost}
-                    deletePost={deletePost}
-                    onClose={() => closeModal("postview")}
-                    modalType={modalType}
-                />
-            )}
-        </div>
-    );
-};
+import MoreModal from "../../ui/MoreModal";
+import BanReportModal from "../../ui/BanReportModal";
+import KakaoShare from "../../ui/kakaoshare/KakaoShare";
+import icons from "../../../assets/ImageList";
+import GetRelativeTime from "../../../utils/GetRelativeTime";
 
 const FeedItem = ({
     post,
@@ -75,19 +24,73 @@ const FeedItem = ({
     profileInfo,
 }) => {
     const { allUserProfiles } = useAllUser();
-    const { openModal, closeModal, isModalOpen } = useModal();
+    const { openModal } = useModal();
     const { postLiked, postLikesCount, handleLikeClick } = useLikeStatus(
         post.id
     );
     const { isFollowing, handleFollow, handleUnfollow } = useFollow();
     const navigate = useNavigate();
+
     const uploadPostTime = GetRelativeTime(post.regTime);
+
     const [commentText, setCommentText] = useState("");
     const [isMoreModalOpen, setIsMoreModalOpen] = useState(false);
     const [isBanReportModalOpen, setIsBanReportModalOpen] = useState(false);
+    const [showFullText, setShowFullText] = useState(false);
+
+    const formatContent = () => {
+        const contentOnly = post.postContent;
+        const hashtags = post.hashtags.join(" ");
+        const fullContent = `${contentOnly} ${hashtags}`;
+        const lines = contentOnly.split("\n");
+        const firstLine = lines[0];
+        let displayText = firstLine;
+        let needMore = false;
+
+        if (firstLine.length > 15) {
+            displayText = firstLine.slice(0, 15);
+            needMore = true;
+        }
+
+        if (fullContent.length > 15 && !needMore) {
+            needMore = true;
+        }
+
+        if (!showFullText) {
+            return (
+                <span>
+                    {displayText}
+                    {needMore && (
+                        <span
+                            className="feed-post-more"
+                            onClick={() => setShowFullText(true)}
+                        >
+                            ...더 보기
+                        </span>
+                    )}
+                </span>
+            );
+        } else {
+            return (
+                <span>
+                    {contentOnly}
+                    {post.hashtags.length > 0 && (
+                        <span className="feed-post-content-hashtags">
+                            {" "}
+                            {hashtags}
+                        </span>
+                    )}
+                </span>
+            );
+        }
+    };
 
     const getImageUrl = (image) => {
         return `http://localhost:8088/uploads/${image.imageUrl}`;
+    };
+
+    const getVideoUrl = (video) => {
+        return `http://localhost:8088/uploads/${video.videoUrl}`;
     };
 
     const getProfileImageUrlForWriter = (email) => {
@@ -126,6 +129,7 @@ const FeedItem = ({
         try {
             await deletePost(post.id);
             setIsMoreModalOpen(false);
+            document.body.style.overflow = "auto";
         } catch (error) {
             console.error("게시글 삭제 중 오류가 발생했습니다.", error);
         }
@@ -136,7 +140,10 @@ const FeedItem = ({
             {
                 label: "취소",
                 className: "moreoption-cancel",
-                onClick: () => setIsMoreModalOpen(false),
+                onClick: () => {
+                    setIsMoreModalOpen(false);
+                    document.body.style.overflow = "auto";
+                },
             },
         ];
 
@@ -200,6 +207,46 @@ const FeedItem = ({
         }
     };
 
+    const sliderSettings = {
+        dots: true,
+        infinite: false,
+        speed: 500,
+        slidesToShow: 1,
+        slidesToScroll: 1,
+        afterChange: (current) => adjustImageSizes(current),
+    };
+
+    const imgRef = useRef([]);
+    const videoRef = useRef([]);
+
+    const adjustImageSizes = () => {
+        imgRef.current.forEach((img) => {
+            if (img.naturalWidth > img.naturalHeight * 1.2) {
+                img.classList.add("wide");
+                img.classList.remove("tall");
+            } else {
+                img.classList.add("tall");
+                img.classList.remove("wide");
+            }
+        });
+
+        videoRef.current.forEach((video) => {
+            video.onloadedmetadata = () => {
+                if (video.videoWidth > video.videoHeight * 1.2) {
+                    video.classList.add("wide");
+                    video.classList.remove("tall");
+                } else {
+                    video.classList.add("tall");
+                    video.classList.remove("wide");
+                }
+            };
+        });
+    };
+
+    useEffect(() => {
+        adjustImageSizes();
+    }, [post.imageList, post.videoList]);
+
     return (
         <div className="feed">
             <div className="feed-frame">
@@ -212,38 +259,40 @@ const FeedItem = ({
                         />
                         <div className="feed-writer-hing">
                             <div className="feed-writer-div">
-                                <span className="feed-writer-name">
-                                    {post.email}{" "}
-                                </span>
-                                <span className="feed-writer-date">
-                                    {"· " + uploadPostTime + " ·"}
-                                </span>
-                                {profileInfo.email !== post.email &&
-                                    writerId &&
-                                    (isFollowing(writerId) ? (
-                                        <button
-                                            className="feed-user-following"
-                                            onClick={(e) => {
-                                                e.stopPropagation(); // 상위 div의 onClick 이벤트 전파를 막기 위해 사용
-                                                handleUnfollow(writerId);
-                                            }}
-                                        >
-                                            팔로잉
-                                        </button>
-                                    ) : (
-                                        <button
-                                            className="feed-user-follow"
-                                            onClick={(e) => {
-                                                e.stopPropagation();
-                                                handleFollow(writerId);
-                                            }}
-                                        >
-                                            팔로우
-                                        </button>
-                                    ))}
-                            </div>
-                            <div className="feed-location">
-                                <span>{post.location}</span>
+                                <div className="feed-writer-info">
+                                    <span className="feed-writer-name">
+                                        {post.email}
+                                    </span>
+                                    <span className="feed-writer-date">
+                                        {"· " + uploadPostTime + " ·"}
+                                    </span>
+                                    {profileInfo.email !== post.email &&
+                                        writerId &&
+                                        (isFollowing(writerId) ? (
+                                            <span
+                                                className="feed-user-following"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleUnfollow(writerId);
+                                                }}
+                                            >
+                                                팔로잉
+                                            </span>
+                                        ) : (
+                                            <span
+                                                className="feed-user-follow"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleFollow(writerId);
+                                                }}
+                                            >
+                                                팔로우
+                                            </span>
+                                        ))}
+                                </div>
+                                <div className="feed-location">
+                                    {post.location}
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -269,16 +318,36 @@ const FeedItem = ({
 
                 {post.imageList && post.imageList.length > 0 && (
                     <div className="feed-post-photos">
-                        {post.imageList.map((image, index) => (
-                            <img
+                        <Slider {...sliderSettings}>
+                            {post.imageList.map((image, index) => (
+                                <div key={index}>
+                                    <img
+                                        className="feed-post-photo"
+                                        src={getImageUrl(image)}
+                                        alt={`Post ${index + 1}`}
+                                        ref={(el) =>
+                                            (imgRef.current[index] = el)
+                                        }
+                                    />
+                                </div>
+                            ))}
+                        </Slider>
+                    </div>
+                )}
+                {post.videoList && post.videoList.length > 0 && (
+                    <div className="feed-post-videos">
+                        {post.videoList.map((video, index) => (
+                            <video
                                 key={index}
-                                className="feed-post-photo"
-                                src={getImageUrl(image)}
-                                alt={`Post ${index + 1}`}
+                                className="feed-post-video"
+                                controls
+                                src={getVideoUrl(video)}
+                                ref={(el) => (videoRef.current[index] = el)}
                             />
                         ))}
                     </div>
                 )}
+
                 <div className="feed-active">
                     <div className="feed-active-btn">
                         <img
@@ -291,8 +360,8 @@ const FeedItem = ({
                             }
                             onClick={handleLikeClick}
                         />
-                        
-                        <KakaoShare post={post}/>
+
+                        <KakaoShare post={post} />
                         <img
                             className="comment_img"
                             alt="댓글"
@@ -310,10 +379,14 @@ const FeedItem = ({
                         좋아요 {postLikesCount}개
                     </div>
                     <div>
-                        <p className="feed-post-content">
-                            {post.postContent}
-                            <span className="feed-post-more"> 더 보기</span>
-                        </p>
+                        <div className="feed-post-content">
+                            <span className="feed-post-content-writer">
+                                {post.email}
+                            </span>{" "}
+                            <span className="feed-post-contents">
+                                {formatContent()}
+                            </span>
+                        </div>
                     </div>
 
                     <div className="feed-comment-more">
@@ -352,4 +425,4 @@ const FeedItem = ({
     );
 };
 
-export default Feed;
+export default FeedItem;

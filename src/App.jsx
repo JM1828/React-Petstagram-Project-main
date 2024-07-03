@@ -21,7 +21,7 @@ import { ChatRoomProvider } from "./contexts/ChatRoomContext";
 import LoginForm from "./components/page/LoginForm";
 import FindPassword from "./components/page/FindPassword";
 import SignUp from "./components/page/SignUp";
-import Feed from "./components/page/Feed";
+import Feed from "./components/page/feed/Feed";
 import FriendFeed from "./components/page/FriendFeed";
 import ExploreFeed from "./components/page/ExploreFeed";
 import MyFeed from "./components/page/MyFeed";
@@ -30,6 +30,7 @@ import HomeNav from "./components/common/HomeNav";
 import FriendNav from "./components/common/FriendNav";
 import SearchNav from "./components/common/SearchNav";
 import NotificationNav from "./components/common/NotificationNav";
+import KakaoCallback from "./components/page/KakaoCallback";
 
 /* Hook */
 import useUser from "./components/hook/useUser";
@@ -37,6 +38,7 @@ import useNav from "./components/hook/useNav";
 
 /* Utils */
 import DogCursor from "./utils/DogCursor";
+import FeedStoryUpload from "./components/page/feed/FeedStoryUpload";
 
 const AppContent = () => {
     const { isLoggedIn, setIsLoggedIn } = useUser();
@@ -56,6 +58,10 @@ const AppContent = () => {
                             <LoginForm setIsLoggedIn={setIsLoggedIn} />
                         )
                     }
+                />
+                <Route
+                    path="/login/oauth2/callback/kakao"
+                    element={<KakaoCallback setIsLoggedIn={setIsLoggedIn} />} // 콜백 경로 처리
                 />
                 <Route
                     path="/signup"
@@ -78,11 +84,15 @@ const AppContent = () => {
                     element={
                         isLoggedIn ? (
                             <div className="app">
-                                <div className="div">
+                                <div className="app-main-wrapper">
                                     {!navState.explore && (
                                         <>
-                                            <Feed />
-                                            <FriendNav />
+                                            <div className="feed-container">
+                                                <Feed />
+                                            </div>
+                                            <div className="friend-nav-container">
+                                                <FriendNav />
+                                            </div>
                                         </>
                                     )}
                                     <div className="main-container">
@@ -104,8 +114,10 @@ const AppContent = () => {
                     element={
                         isLoggedIn ? (
                             <div className="app">
-                                <div className="div">
-                                    <ExploreFeed />
+                                <div className="app-main-wrapper">
+                                    <div className="feed-container">
+                                        <ExploreFeed />{" "}
+                                    </div>
                                     <div className="main-container">
                                         <HomeNav />
                                         {navState.search && <SearchNav />}
@@ -125,7 +137,7 @@ const AppContent = () => {
                     element={
                         isLoggedIn ? (
                             <div className="app">
-                                <div className="div">
+                                <div className="app-main-wrapper">
                                     <Message />
                                     <div className="main-container">
                                         <HomeNav />
@@ -146,8 +158,10 @@ const AppContent = () => {
                     element={
                         isLoggedIn ? (
                             <div className="app">
-                                <div className="div">
-                                    <MyFeed />
+                                <div className="app-main-wrapper">
+                                    <div className="myfeed-container">
+                                        <MyFeed />{" "}
+                                    </div>
                                     <div className="main-container">
                                         <HomeNav />
                                         {navState.search && <SearchNav />}
@@ -167,8 +181,10 @@ const AppContent = () => {
                     element={
                         isLoggedIn ? (
                             <div className="app">
-                                <div className="div">
-                                    <FriendFeed />
+                                <div className="app-main-wrapper">
+                                    <div className="friendfeed-container">
+                                        <FriendFeed />
+                                    </div>
                                     <div className="main-container">
                                         <HomeNav />
                                         {navState.search && <SearchNav />}
@@ -188,7 +204,7 @@ const AppContent = () => {
                     element={
                         isLoggedIn ? (
                             <div className="app">
-                                <div className="div">
+                                <div className="app-main-wrapper">
                                     <Message />
                                     <div className="main-container">
                                         <HomeNav />
@@ -198,6 +214,18 @@ const AppContent = () => {
                                         )}
                                     </div>
                                 </div>
+                            </div>
+                        ) : (
+                            <Navigate to="/login" />
+                        )
+                    }
+                />
+                <Route
+                    path="/story-upload"
+                    element={
+                        isLoggedIn ? (
+                            <div className="app">
+                                <FeedStoryUpload />
                             </div>
                         ) : (
                             <Navigate to="/login" />

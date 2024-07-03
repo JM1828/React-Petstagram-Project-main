@@ -5,7 +5,7 @@
     align-items: center;
     justify-content: center;
     height: 100vh;
-  
+
 }
 
 .login-form {
@@ -28,7 +28,7 @@
 }
 
 .login-input-email,
-.login-input-password{
+.login-input-password {
     width: 100%;
     max-width: 320px;
     padding: 10px;
@@ -37,7 +37,7 @@
     box-sizing: border-box;
 }
 
-.login-submit{
+.login-submit {
     width: 100%;
     max-width: 320px;
     padding: 10px;
@@ -50,7 +50,7 @@
     background-color: #7ab3f4;
 }
 
-.login-error-message{
+.login-error-message {
     margin-top: 10px;
     text-align: center;
     font-size: 15px;
@@ -91,6 +91,18 @@ a {
     margin-right: 5px;
 }
 
+.kakako-login {
+    text-align: center;
+    font-size: 17px;
+    font-weight: bold;
+}
+
+.kakao-login img {
+    width: 14px;
+    height: auto;
+    margin-right: 5px;
+}
+
 .forgot-password {
     font-size: 13px;
     margin-top: 25px;
@@ -123,4 +135,3 @@ a {
 .signup-link:hover {
     color: #4193ef;
 }
-

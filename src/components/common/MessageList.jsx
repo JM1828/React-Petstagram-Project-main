@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import "./MessageList.css";
 import { useNavigate } from "react-router-dom";
 

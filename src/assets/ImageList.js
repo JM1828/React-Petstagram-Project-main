@@ -24,6 +24,8 @@ import BasicImage from "./basic-profile.jpeg";
 
 /* MyFeed */
 import shareIcon from "/src/assets/myfeed/myfeed-share.png";
+import videoIcon from "/src/assets/myfeed/myfeed-video.png";
+import imgaeIcon from "/src/assets/myfeed/myfeed-image.png";
 
 /* Webcam */
 import transform from "/src/assets/camera/transform.png";
@@ -41,9 +43,11 @@ import moreIcon2 from "./postviewmodal/postview-comment-more.png";
 import lineIcon from "./postviewmodal/postview-line.png";
 
 /* PostModal */
+import photoIcon from "./postmodal/photo.png";
 import smileIcon from "./postmodal/smile.png";
 import locationIcon from "./postmodal/location.png";
 import underArrowIcon from "./postmodal/under.png";
+import addHashTagIcon from "./postmodal/hashtag-add.png";
 
 /* FindPassword */
 import lockIcon from "./find-password.png";
@@ -59,6 +63,25 @@ import messageWriteClose from "./message/message-close.png";
 import messageAudioClose from "./message/message-close2.png";
 import messagePauseIcon from "./message/message-pause.png";
 import messagePlayIcon from "./message/message-play.png";
+
+/* Setting Modal */
+import settingBackIcon from "./settingmodal/setting-back.png";
+import settingNextIcon from "./settingmodal/setting-next-button.png";
+import settingCloseIcon from "./settingmodal/setting-close.png";
+import settingConnectionIcon from "./settingmodal/setting-connection.png";
+import settingMetaIcon from "./settingmodal/setting-meta.png";
+import settingUserProfileIcon from "./settingmodal/setting-user-profile.png";
+
+/* HashTags Modal */
+import hashTagsIcon from "./hashtag/hashtag-icon.png";
+
+/* Story */
+import storyCameraBtn from "./story/story-camera-button.png";
+import storyGallery from "./story/story-gallery.png";
+import storyText from "./story/story-text.png";
+import storyHashtag from "./story/story-hashtag.png";
+import storyUpload from "./story/story-upload.png";
+import storyClose from "./story/story-close-button.png";
 
 const icons = {
     // HomeNav
@@ -87,6 +110,8 @@ const icons = {
 
     // Myfeed
     shareIcon,
+    videoIcon,
+    imgaeIcon,
 
     // Webcam
     transform,
@@ -104,9 +129,11 @@ const icons = {
     lineIcon,
 
     // PostModal
+    photoIcon,
     smileIcon,
     locationIcon,
     underArrowIcon,
+    addHashTagIcon,
 
     // FindPassword
     lockIcon,
@@ -122,6 +149,25 @@ const icons = {
     messageAudioClose,
     messagePauseIcon,
     messagePlayIcon,
+
+    // Setting Modal
+    settingBackIcon,
+    settingNextIcon,
+    settingCloseIcon,
+    settingConnectionIcon,
+    settingMetaIcon,
+    settingUserProfileIcon,
+
+    // HashTags Modal
+    hashTagsIcon,
+
+    /* Story */
+    storyCameraBtn,
+    storyGallery,
+    storyText,
+    storyHashtag,
+    storyUpload,
+    storyClose,
 };
 
 export default icons;
