@@ -19,13 +19,6 @@ const Feed = () => {
     const [selectedPost, setSelectedPost] = useState(postList);
     const [modalType, setModalType] = useState("feed");
 
-    /* Mock */
-    const stories = [
-        { username: "user1", profileImage: "profile1.jpg" },
-        { username: "user2", profileImage: "profile2.jpg" },
-        { username: "user3", profileImage: "profile3.jpg" },
-    ];
-
     const handlePostViewClick = (post) => {
         setSelectedPost(post);
         setModalType(profileInfo.email === post.email ? "myfeed" : "feed");
@@ -35,7 +28,7 @@ const Feed = () => {
     return (
         <div className="feed-container">
             <div className="story-container">
-                <FeedStoryList stories={stories} />
+                <FeedStoryList />
             </div>
             {postList.map((post) => {
                 const postComments =

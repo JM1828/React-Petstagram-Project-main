@@ -16,6 +16,7 @@ import { ModalProvider } from "./contexts/ModalContext";
 import { FollowProvider } from "./contexts/FollowContext";
 import { CommentProvider } from "./contexts/CommentContext";
 import { ChatRoomProvider } from "./contexts/ChatRoomContext";
+import { StoryProvider } from "./contexts/StoryContext";
 
 /* 컴포넌트 */
 import LoginForm from "./components/page/LoginForm";
@@ -26,6 +27,7 @@ import FriendFeed from "./components/page/FriendFeed";
 import ExploreFeed from "./components/page/ExploreFeed";
 import MyFeed from "./components/page/MyFeed";
 import Message from "./components/page/Message";
+import StoryView from "./components/page/StoryView";
 import HomeNav from "./components/common/HomeNav";
 import FriendNav from "./components/common/FriendNav";
 import SearchNav from "./components/common/SearchNav";
@@ -35,15 +37,18 @@ import KakaoCallback from "./components/page/KakaoCallback";
 /* Hook */
 import useUser from "./components/hook/useUser";
 import useNav from "./components/hook/useNav";
+import useStory from "./components/hook/useStory";
 
 /* Utils */
 import DogCursor from "./utils/DogCursor";
 import FeedStoryUpload from "./components/page/feed/FeedStoryUpload";
 
+import { useState } from "react";
+
 const AppContent = () => {
     const { isLoggedIn, setIsLoggedIn } = useUser();
     const { navState } = useNav();
-
+    
     return (
         <Router>
             <DogCursor />
@@ -160,7 +165,7 @@ const AppContent = () => {
                             <div className="app">
                                 <div className="app-main-wrapper">
                                     <div className="myfeed-container">
-                                        <MyFeed />{" "}
+                                        <MyFeed />
                                     </div>
                                     <div className="main-container">
                                         <HomeNav />
@@ -232,6 +237,16 @@ const AppContent = () => {
                         )
                     }
                 />
+                <Route
+                    path="/story-detail/:id"
+                    element={
+                        isLoggedIn ? (
+                            <StoryView />
+                        ) : (
+                            <Navigate to="/login" />
+                        )
+                    }
+                />
             </Routes>
         </Router>
     );
@@ -246,7 +261,9 @@ const App = () => (
                         <FollowProvider>
                             <ModalProvider>
                                 <ChatRoomProvider>
-                                    <AppContent />
+                                    <StoryProvider>
+                                        <AppContent />
+                                    </StoryProvider>
                                 </ChatRoomProvider>
                             </ModalProvider>
                         </FollowProvider>

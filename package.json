@@ -25,6 +25,7 @@
         "@tensorflow/tfjs-core": "^4.19.0",
         "@tensorflow/tfjs-node": "^4.19.0",
         "axios": "^1.6.8",
+        "classnames": "^2.5.1",
         "cors": "^2.8.5",
         "events": "^3.3.0",
         "express": "^4.19.2",

@@ -5,7 +5,7 @@ import "./FeedStoryUpload.css";
 import Draggable from "react-draggable";
 import icons from "../../../assets/ImageList";
 import StoryService from "../../service/StoryService";
-
+import useStory from "../../hook/useStory";
 const videoConstraints = {
     width: 600,
     height: 900,
@@ -13,6 +13,7 @@ const videoConstraints = {
 };
 
 const FeedStoryUpload = () => {
+    const { uploadStory } = useStory();
     const webcamRef = useRef(null);
     const canvasRef = useRef(null);
     const mediaRecorderRef = useRef(null);
@@ -21,7 +22,7 @@ const FeedStoryUpload = () => {
     const navigate = useNavigate();
 
     const [mediaUrl, setMediaUrl] = useState(null);
-    const [text, setText] = useState("Your Text Here");
+    const [text, setText] = useState("");
     const [recording, setRecording] = useState(false);
     const [capturedChunks, setCapturedChunks] = useState([]);
     const [showTextBox, setShowTextBox] = useState(false);
@@ -29,7 +30,6 @@ const FeedStoryUpload = () => {
     const [fontColor, setFontColor] = useState("#FFFFFF");
     const [textPosition, setTextPosition] = useState({ x: 50, y: 50 });
     const [isImageCapture, setIsImageCapture] = useState(true);
-    const [file, setFile] = useState(null);
 
     const handleDataAvailable = (e) => {
         if (e.data && e.data.size > 0) {
@@ -107,7 +107,6 @@ const FeedStoryUpload = () => {
             const imageSrc = canvas.toDataURL("image/jpeg");
             if (imageSrc) {
                 setMediaUrl(imageSrc);
-                setFile(null);
             } else {
                 console.error("Failed to capture image");
             }
@@ -139,8 +138,6 @@ const FeedStoryUpload = () => {
         if (file) {
             const url = URL.createObjectURL(file);
             setMediaUrl(url);
-            setFile(file);
-            setIsImageCapture(false); // 파일을 선택하면 이미지 캡처 모드를 비활성화
         }
     };
 
@@ -168,58 +165,38 @@ const FeedStoryUpload = () => {
     };
 
     const handleUploadClick = async () => {
-        if (file || mediaUrl) {
-            try {
-                const formData = new FormData();
-    
-                // 파일 타입에 따른 storyType 설정
-                let storyType = "";
-    
-                if (file) {
-                    if (file.type.startsWith("image/")) {
-                        storyType = "image";
-                        formData.append("file", file);
-                    } else if (file.type.startsWith("video/")) {
-                        storyType = "video";
-                        formData.append("file", file);
-                    } else {
-                        console.error("지원하지 않는 파일 타입입니다.");
-                        return;
-                    }
-                } else if (mediaUrl) {
-                    if (isImageCapture) {
-                        storyType = "image";
-                        const blob = await fetch(mediaUrl).then((res) => res.blob());
-                        formData.append("file", blob, "captured_image.jpeg");
-                    } else {
-                        storyType = "video";
-                        const blob = await fetch(mediaUrl).then((res) => res.blob());
-                        formData.append("file", blob, "captured_video.mp4");
-                    }
-                } else {
-                    console.error("지원하지 않는 파일 타입입니다.");
-                    return;
+        if (!mediaUrl) {
+            alert("업로드할 미디어가 없습니다.");
+            return;
+        }
+
+        const formData = new FormData();
+        const blob = await fetch(mediaUrl).then((r) => r.blob());
+        const file = new File([blob], "media", { type: blob.type });
+
+        formData.append("file", file);
+        formData.append(
+            "story",
+            new Blob(
+                [
+                    JSON.stringify({
+                        storyText: text,
+                        storyType: isImageCapture ? "image" : "video",
+                    }),
+                ],
+                {
+                    type: "application/json",
                 }
-    
-                // StoryDTO 데이터 추가
-                const storyDTO = {
-                    storyText: text, 
-                    storyType: storyType,
-                };
-                formData.append("story", new Blob([JSON.stringify(storyDTO)], { type: "application/json" }));
-    
-                // 파일 업로드 요청
-                const response = await StoryService.uploadStory(formData);
-                console.log("Upload successful:", response);
-                navigate("/");
-            } catch (error) {
-                console.error("Error uploading file:", error);
-                if (error.response) {
-                    console.error("서버 응답:", error.response.data);
-                }
-            }
-        } else {
-            console.error("파일이 선택되지 않았습니다.");
+            )
+        );
+
+        try {
+            await uploadStory(formData);
+            alert("스토리가 업로드 되었습니다.");
+            navigate("/");
+        } catch (error) {
+            console.error("Failed to upload story", error);
+            alert("스토리 업로드에 실패했습니다.");
         }
     };
 
@@ -349,8 +326,9 @@ const FeedStoryUpload = () => {
                                         style={{
                                             fontSize: `${fontSize}px`,
                                             color: fontColor,
-                                            width: `${text.length * fontSize
-                                                }px`,
+                                            width: `${
+                                                text.length * fontSize
+                                            }px`,
                                         }}
                                     />
                                 </div>

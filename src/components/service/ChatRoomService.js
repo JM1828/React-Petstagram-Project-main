@@ -94,23 +94,24 @@ class ChatRoomService {
 
     // 음성 파일 업로드 메서드
     static async uploadAudio(audioBlob) {
-        const formData = new FormData();
-        formData.append("file", audioBlob, "audioMessage.webm");
-
-        const token = localStorage.getItem("token");
-        const response = await fetch(`${this.BASE_URL}/user/uploadAudio`, {
-            method: "POST",
-            body: formData,
-            headers: { Authorization: `Bearer ${token}` },
-        });
-
-        if (!response.ok) {
-            throw new Error("Failed to upload audio");
-        }
-
-        const data = await response.json();
-        return data.audioUrl;
-    }
+      const formData = new FormData();
+      formData.append("file", audioBlob, "audioMessage.webm");  
+  
+      const token = localStorage.getItem("token");
+      const response = await fetch(`${this.BASE_URL}/user/uploadAudio`, {
+          method: "POST",
+          body: formData,
+          headers: { Authorization: `Bearer ${token}` },
+      });
+  
+      if (!response.ok) {
+          throw new Error("Failed to upload audio");
+      }
+  
+      const data = await response.json();
+      return data.audioUrl; 
+  }
+  
 }
 
 export default ChatRoomService;
