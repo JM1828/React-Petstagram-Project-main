@@ -50,10 +50,20 @@ const MessageList = () => {
                                     profileInfo.id
                                     ? "나: 사진을 보냈습니다."
                                     : "사진을 보냈습니다."
-                                : chatRoom.messages[0].senderId ===
-                                    profileInfo.id
-                                    ? `나: ${chatRoom.messages[0].messageContent}`
-                                    : chatRoom.messages[0].messageContent
+                                : chatRoom.messages[0].videoList &&
+                                    chatRoom.messages[0].videoList.length > 0
+                                    ? chatRoom.messages[0].senderId === profileInfo.id
+                                        ? "나: 동영상을 보냈습니다."
+                                        : "동영상을 보냈습니다."
+                                    : chatRoom.messages[0].audioUrl &&
+                                        chatRoom.messages[0].audioUrl.length > 0
+                                        ? chatRoom.messages[0].senderId === profileInfo.id
+                                            ? "나: 음성 메시지를 보냈습니다."
+                                            : "음성 메시지를 보냈습니다."
+                                        : chatRoom.messages[0].senderId ===
+                                            profileInfo.id
+                                            ? `나: ${chatRoom.messages[0].messageContent}`
+                                            : chatRoom.messages[0].messageContent
                             : "메시지가 없습니다.";
 
                     const lastMessageTime =

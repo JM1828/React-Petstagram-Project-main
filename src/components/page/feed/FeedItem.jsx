@@ -9,6 +9,8 @@ import useLikeStatus from "../../hook/useLikeStatus";
 import useFollow from "../../hook/useFollow";
 import useModal from "../../hook/useModal";
 
+import PageEditModal from "../../ui/PageEditModal";
+
 import MoreModal from "../../ui/MoreModal";
 import BanReportModal from "../../ui/BanReportModal";
 import KakaoShare from "../../ui/kakaoshare/KakaoShare";
@@ -24,7 +26,7 @@ const FeedItem = ({
     profileInfo,
 }) => {
     const { allUserProfiles } = useAllUser();
-    const { openModal } = useModal();
+    const { openModal, closeModal, isModalOpen, toggleModal } = useModal();
     const { postLiked, postLikesCount, handleLikeClick } = useLikeStatus(
         post.id
     );
@@ -33,8 +35,10 @@ const FeedItem = ({
 
     const uploadPostTime = GetRelativeTime(post.regTime);
 
+    const [currentPost, setCurrentPost] = useState(post);
     const [commentText, setCommentText] = useState("");
     const [isMoreModalOpen, setIsMoreModalOpen] = useState(false);
+    const [isPostEditModalOpen, setIsPostEditModalOpen] = useState(false);
     const [isBanReportModalOpen, setIsBanReportModalOpen] = useState(false);
     const [showFullText, setShowFullText] = useState(false);
 
@@ -157,7 +161,10 @@ const FeedItem = ({
                 {
                     label: "수정",
                     className: "moreoption-edit",
-                    onClick: () => openModal("edit"),
+                    onClick: () => {
+                        setIsPostEditModalOpen(true);
+                        setIsMoreModalOpen(false);
+                    }
                 },
                 ...commonOptions,
             ];
@@ -412,6 +419,18 @@ const FeedItem = ({
                     </form>
                 </div>
             </div>
+
+            {isPostEditModalOpen && (
+                <PageEditModal
+                    onClose={() => {
+                        setIsPostEditModalOpen(false);
+                    }}
+                    allUserProfiles={allUserProfiles}
+                    post={currentPost}
+                    setCurrentPost={setCurrentPost}
+                />
+            )}
+
             {isBanReportModalOpen && (
                 <BanReportModal
                     onClose={() => {
