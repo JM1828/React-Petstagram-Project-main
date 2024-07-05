@@ -15,10 +15,12 @@ import useAudioRecorder from "../hook/useAudioRecorder.js";
 import CreateChatRoom from "../ui/message/CreateChatRoom.jsx";
 import CustomAudioPlay from "../ui/message/CustomAudioPlay.jsx";
 
+import { getDisplayTime } from "../../utils/GetNotiTime.js";
+
 import icons from "../../assets/ImageList.js";
 
 const MessageRoom = () => {
-    const { selectedUser, chatRoomId, messages } = useChatRoom();
+    const { selectedUser, chatRoomId, messages, chatMessageList } = useChatRoom();
     const { profileInfo } = useUser();
     const { openModal, closeModal, isModalOpen } = useModal();
     const {
@@ -39,6 +41,7 @@ const MessageRoom = () => {
     const [isReset, setIsReset] = useState(true);
 
     const location = useLocation();
+    const { unreadMessageCount } = location.state || { unreadMessageCount: 0 };
 
     const getImageUrl = (image) => {
         return `http://localhost:8088/uploads/${image.imageUrl}`;
@@ -67,7 +70,6 @@ const MessageRoom = () => {
                 imageUrls.push(imageUrl);
             } else if (file.type.startsWith("video/")) {
                 const videoUrl = await ChatRoomService.uploadVideo(fileToUpload);
-                console.log("제발 나와라", videoUrl);
                 videoUrls.push(videoUrl);
             }
         }
@@ -293,6 +295,7 @@ const MessageRoom = () => {
                     {messages
                         .filter((message) => message.chatRoomId === chatRoomId)
                         .map((message, index, array) => {
+                            const isLastMessage = index === array.length - 1;
                             const isLastConsecutiveMessage =
                                 index === array.length - 1 ||
                                 array[index + 1].senderId !== message.senderId;
@@ -373,6 +376,11 @@ const MessageRoom = () => {
                                             )}
                                         </div>
                                     </div>
+                                    { isLastMessage && message.senderId === profileInfo.id && unreadMessageCount === 0 && (
+                                        <div className="message-read-status" style={{ textAlign: 'right' }}>
+                                            확인한 시간: {getDisplayTime(messages.regTime)}
+                                        </div>
+                                    )}
                                 </div>
                             );
                         })}

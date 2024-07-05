@@ -18,9 +18,9 @@ const MessageList = () => {
     const { profileInfo, getProfileImageUrl } = useUser();
     const navigate = useNavigate();
 
-    const handleChatRoomUserClick = async (chatRoomId) => {
+    const handleChatRoomUserClick = async (chatRoomId, unreadMessageCount) => {
         await handleUserClick(chatRoomId);
-        navigate(`/messages/${chatRoomId}`, { state: { chatRoomId } }); // 채팅방 ID를 state로 전달
+        navigate(`/messages/${chatRoomId}`, { state: { chatRoomId,unreadMessageCount } });
     };
 
     return (
@@ -91,7 +91,7 @@ const MessageList = () => {
                             key={chatRoom.id}
                             className={`Message_message_item ${chatRoom.unreadMessageCount > 0 ? "new-message" : "read-message"
                                 }`}
-                            onClick={() => handleChatRoomUserClick(chatRoom.id)}
+                            onClick={() => handleChatRoomUserClick(chatRoom.id, chatRoom.unreadMessageCount)}
                         >
                             <img
                                 className="Message_profile_image"

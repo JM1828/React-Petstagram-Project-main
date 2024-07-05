@@ -4,7 +4,7 @@ import "moment/locale/ko";
 moment.updateLocale("ko", {
     relativeTime: {
         past: "%s",
-        s: "%d초",
+        s: "방금",
         ss: "%d초",
         m: "1분",
         mm: "%d분",
