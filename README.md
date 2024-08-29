@@ -1,18 +1,8 @@
-# React + Vite
-
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
-
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-
-펫스타그램 (Petstagram)
+# 펫스타그램 (Petstagram)
 
 
 
-프로젝트 소개
+## 프로젝트 소개
 
 펫스타그램은 사용자가 자신의 반려동물 사진을 업로드하고 공유할 수 있는 플랫폼입니다.
 
@@ -22,13 +12,21 @@ Currently, two official plugins are available:
 
 
 
-개발 기간
+## 개발 기간
 
 2024.05.17 ~ 2024.07.05
 
 
+## 개발자 소개
 
-개발 환경
+개발자 1: [구준모] - 백엔드 개발 (Spring Boot, Spring Security, JWT), 데이터베이스 및 아키텍처 설계 (MySQL, Spring Data JPA)
+
+개발자 2: [허민석] - 프론트엔드 개발 (React, Axios)
+
+개발자 3: [최지호] - 프론트엔드 개발 (React, Axios)
+
+
+## 개발 환경
 
 운영 체제: Windows / macOS
 
@@ -38,7 +36,7 @@ IDE: IntelliJ IDEA, Visual Studio Code
 
 
 
-기술 스택
+## 기술 스택
 
 프론트엔드: React, Axios
 
@@ -48,7 +46,7 @@ IDE: IntelliJ IDEA, Visual Studio Code
 
 
 
-주요 기능
+## 주요 기능
 
 사용자 인증: Spring Security와 JWT를 활용하여 무상태 인증 및 권한 부여 시스템 구현
 
@@ -60,7 +58,7 @@ IDE: IntelliJ IDEA, Visual Studio Code
 
 
 
-프로젝트 아키텍처
+## 프로젝트 아키텍처
 
 클라이언트: React 기반의 프론트엔드로, Axios를 통해 백엔드와 통신하며 사용자 인증 토큰(JWT)을 로컬스토리지에 저장합니다.
 
